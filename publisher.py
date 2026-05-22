@@ -12,8 +12,8 @@ if sys.platform.startswith('win'):
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 # --- CONFIGURATION PATHS ---
-OBSIDIAN_POSTS_DIR = r"D:\Vault\Sammy.Decimal\80-89 🦋 Documents\86 Writing"
-OBSIDIAN_IMAGES_DIR = r"D:\Vault\Sammy.Decimal\90-99 🐙 Archives\98 Digital Archives"
+OBSIDIAN_POSTS_DIR = r"C:\Temp\Sammy.Decimal\80-89 🦋 Documents\86 Writing"
+OBSIDIAN_IMAGES_DIR = r"C:\Temp\Sammy.Decimal\90-99 🐙 Archives\98 Digital Archives"
 JEKYLL_POSTS_DIR = "./_posts" 
 JEKYLL_IMAGES_DIR = "./_assets/images"
 
@@ -71,7 +71,11 @@ def publish_to_jekyll(title: str, clean_markdown: str, metadata: dict) -> bool:
     """Saves the content right into the Jekyll compilation pipeline."""
     try:
         date_str = datetime.date.today().strftime("%Y-%m-%d")
-        safe_title = title.lower().replace(" ", "-").replace('"', '').replace("'", "")
+        safe_title = title.lower().replace(" ", "-").replace("_", "-")
+        # Remove characters that aren't letters, numbers, or hyphens
+        safe_title = re.sub(r'[^a-z0-9\-]', '', safe_title)
+        # Collapse multiple hyphens and strip leading/trailing hyphens
+        safe_title = re.sub(r'-+', '-', safe_title).strip('-')
         file_name = f"{date_str}-{safe_title}.md"
         file_path = os.path.join(JEKYLL_POSTS_DIR, file_name)
         
