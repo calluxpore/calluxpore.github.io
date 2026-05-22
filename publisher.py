@@ -83,8 +83,56 @@ def publish_to_jekyll(title: str, clean_markdown: str, metadata: dict) -> bool:
         post['layout'] = 'post'
         post['title'] = title
         post['date'] = date_str
-        post['tags'] = metadata.get("tags", [])
         
+        # Handle categories and tags
+        if 'tags' in metadata:
+            post['tags'] = metadata['tags']
+            post['categories'] = metadata['tags']  # Map tags to categories for Jekyll
+        if 'categories' in metadata:
+            post['categories'] = metadata['categories']
+            if 'tags' not in post:
+                post['tags'] = metadata['categories']
+                
+        # Resolve and copy frontmatter image if specified
+        if 'image' in metadata and metadata['image']:
+            raw_img_path = str(metadata['image']).strip()
+            # Strip wiki-link syntax [[image.png]] if present
+            raw_img_path = re.sub(r'^\[\[(.*)\]\]$', r'\1', raw_img_path).strip()
+            
+            src_path = os.path.join(OBSIDIAN_IMAGES_DIR, raw_img_path)
+            if not os.path.exists(src_path):
+                src_path = None
+                if os.path.exists(OBSIDIAN_IMAGES_DIR):
+                    for f in os.listdir(OBSIDIAN_IMAGES_DIR):
+                        if f.lower() == raw_img_path.lower():
+                            src_path = os.path.join(OBSIDIAN_IMAGES_DIR, f)
+                            break
+            
+            if src_path and os.path.exists(src_path):
+                base_name = os.path.basename(src_path)
+                name_part, ext_part = os.path.splitext(base_name)
+                safe_name = name_part.lower().replace(" ", "-").replace("_", "-")
+                safe_name = re.sub(r'[^a-z0-9\-]', '', safe_name)
+                safe_filename = f"{safe_name}{ext_part.lower()}"
+                
+                os.makedirs(JEKYLL_IMAGES_DIR, exist_ok=True)
+                dest_path = os.path.join(JEKYLL_IMAGES_DIR, safe_filename)
+                
+                try:
+                    shutil.copy2(src_path, dest_path)
+                    print(f"📸 Copied frontmatter image: '{raw_img_path}' -> '{dest_path}'")
+                    post['image'] = f"/_assets/images/{safe_filename}"
+                except Exception as e:
+                    print(f"⚠️ Failed to copy frontmatter image {raw_img_path}: {str(e)}")
+                    post['image'] = raw_img_path
+            else:
+                # If image starts with a web URL or is already resolved, keep as is
+                if raw_img_path.startswith('/') or raw_img_path.startswith('http'):
+                    post['image'] = raw_img_path
+                else:
+                    print(f"⚠️ Frontmatter image not found in Obsidian images folder: '{raw_img_path}'")
+                    post['image'] = raw_img_path
+
         os.makedirs(JEKYLL_POSTS_DIR, exist_ok=True)
         
         with open(file_path, 'w', encoding='utf-8') as f:

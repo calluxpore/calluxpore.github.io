@@ -5,61 +5,71 @@ title: Home
 
 {% assign categories_list = "" %}
 {% for post in site.posts %}
-  {% for category in post.categories %}
-    {% unless categories_list contains category %}
-      {% if categories_list == "" %}
-        {% assign categories_list = category %}
-      {% else %}
-        {% assign categories_list = categories_list | append: "," | append: category %}
-      {% endif %}
-    {% endunless %}
-  {% endfor %}
+{% for category in post.categories %}
+{% unless categories_list contains category %}
+{% if categories_list == "" %}
+{% assign categories_list = category %}
+{% else %}
+{% assign categories_list = categories_list | append: "," | append: category %}
+{% endif %}
+{% endunless %}
+{% endfor %}
 {% endfor %}
 {% assign all_categories = categories_list | split: "," | sort %}
 
 <section class="home-intro" style="margin-bottom: 3rem; padding-bottom: 1rem;">
   <p class="lead"
     style="margin-top: 0; font-size: 0.98rem; font-weight: 400; color: var(--text-muted); line-height: 1.6;">
-    Creative Technologist based in Toronto, Canada. Designing for and with Artificial Intelligence.
+    Welcome to my Mind Palace. Here, I dive deep into the design, code, and thinking behind everything I build. Take a
+    look inside to see how I'm experimenting with AI for humanity.
   </p>
 </section>
 
 <!-- Posts List Section -->
 <section class="posts-section">
+  {% if site.posts.size > 0 %}
+  <!-- Category Filter Navigation -->
+  {% if all_categories.size > 0 %}
+  <div class="category-filter-nav">
+    <button class="filter-btn active" data-filter="all">All</button>
+    {% for category in all_categories %}
+    {% if category != "" %}
+    <button class="filter-btn" data-filter="{{ category | downcase | replace: ' ', '-' }}">{{ category | escape }}</button>
+    {% endif %}
+    {% endfor %}
+  </div>
+  <hr class="filter-separator">
+  {% endif %}
+
   <h2 class="posts-section-title">Latest Writing</h2>
 
-  {% if site.posts.size > 0 %}
-    <!-- Category Filter Navigation -->
-    {% if all_categories.size > 0 %}
-    <div class="category-filter-nav">
-      <button class="filter-btn active" data-filter="all">All</button>
-      {% for category in all_categories %}
-        {% if category != "" %}
-          <button class="filter-btn" data-filter="{{ category | downcase | replace: ' ', '-' }}">{{ category | escape }}</button>
+  <ul class="posts-list">
+    {% for post in site.posts %}
+    <li class="post-item"
+      data-categories="all,{% for category in post.categories %}{{ category | downcase | replace: ' ', '-' }}{% if forloop.last == false %},{% endif %}{% endfor %}">
+      
+      <!-- Post Image -->
+      <a href="{{ post.url | relative_url }}" class="post-item-image-container" aria-label="{{ post.title | escape }}">
+        {% if post.image %}
+          <img src="{{ post.image | relative_url }}" alt="{{ post.title }}" class="post-item-image">
+        {% else %}
+          <div class="post-item-image-placeholder">
+            <span>✱</span>
+          </div>
         {% endif %}
-      {% endfor %}
-    </div>
-    {% endif %}
+      </a>
 
-    <ul class="posts-list">
-      {% for post in site.posts %}
-      <li class="post-item" data-categories="all,{% for category in post.categories %}{{ category | downcase | replace: ' ', '-' }}{% if forloop.last == false %},{% endif %}{% endfor %}">
+      <!-- Post Content Body -->
+      <div class="post-item-body">
         <!-- Post Metadata -->
         <div class="post-meta-container">
           <time datetime="{{ post.date | date_to_xmlschema }}">
             {{ post.date | date: "%B %d, %Y" }}
           </time>
-          {% if post.categories.size > 0 %}
-          <span>•</span>
-          {% for category in post.categories %}
-          <span class="post-category-tag">{{ category | escape }}</span>
-          {% endfor %}
-          {% endif %}
           <span>•</span>
           <span>
             {% assign words = post.content | number_of_words %}
-            {% if words < 360 %} 1 min read {% else %} {{ words | divided_by: 180 }} min read {% endif %}
-          </span>
+            {% if words < 360 %} 1 min read {% else %} {{ words | divided_by: 180 }} min read {% endif %} </span>
         </div>
 
         <!-- Post Title -->
@@ -72,69 +82,80 @@ title: Home
           {{ post.excerpt | strip_html | truncatewords: 30 }}
         </p>
 
+        <!-- Post Categories -->
+        {% if post.categories.size > 0 %}
+        <div class="post-categories-container">
+          {% for category in post.categories %}
+          <span class="post-category-tag">{{ category | escape }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Read Link -->
         <a class="read-more-link" href="{{ post.url | relative_url }}">Read Article</a>
-      </li>
-      {% endfor %}
-    </ul>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
   {% else %}
-    <p style="color: var(--text-muted); font-style: italic;">No posts found. Start writing in the <code>_posts</code> directory!</p>
+  <p style="color: var(--text-muted); font-style: italic;">No posts found. Start writing in the <code>_posts</code>
+    directory!</p>
   {% endif %}
 </section>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const buttons = document.querySelectorAll(".filter-btn");
-  const posts = document.querySelectorAll(".post-item");
+  document.addEventListener("DOMContentLoaded", function () {
+    const buttons = document.querySelectorAll(".filter-btn");
+    const posts = document.querySelectorAll(".post-item");
 
-  function filterCategory(filterVal) {
+    function filterCategory(filterVal) {
+      buttons.forEach(btn => {
+        if (btn.getAttribute("data-filter") === filterVal) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+
+      posts.forEach(post => {
+        const dataCats = post.getAttribute("data-categories") || "";
+        const postCategories = dataCats.split(",");
+        if (filterVal === "all" || postCategories.includes(filterVal)) {
+          post.style.display = "";
+        } else {
+          post.style.display = "none";
+        }
+      });
+    }
+
     buttons.forEach(btn => {
-      if (btn.getAttribute("data-filter") === filterVal) {
-        btn.classList.add("active");
-      } else {
-        btn.classList.remove("active");
-      }
+      btn.addEventListener("click", function () {
+        const filterVal = this.getAttribute("data-filter");
+        filterCategory(filterVal);
+        if (filterVal === "all") {
+          history.replaceState(null, null, " ");
+        } else {
+          window.location.hash = filterVal;
+        }
+      });
     });
 
-    posts.forEach(post => {
-      const dataCats = post.getAttribute("data-categories") || "";
-      const postCategories = dataCats.split(",");
-      if (filterVal === "all" || postCategories.includes(filterVal)) {
-        post.style.display = "block";
-      } else {
-        post.style.display = "none";
-      }
-    });
-  }
-
-  buttons.forEach(btn => {
-    btn.addEventListener("click", function() {
-      const filterVal = this.getAttribute("data-filter");
-      filterCategory(filterVal);
-      if (filterVal === "all") {
-        history.replaceState(null, null, " ");
-      } else {
-        window.location.hash = filterVal;
-      }
-    });
-  });
-
-  // Handle initial page load or back/forward navigation using URL hash
-  function checkHash() {
-    if (window.location.hash) {
-      const initialFilter = window.location.hash.substring(1);
-      const matchedBtn = document.querySelector(`.filter-btn[data-filter="${initialFilter}"]`);
-      if (matchedBtn) {
-        filterCategory(initialFilter);
+    // Handle initial page load or back/forward navigation using URL hash
+    function checkHash() {
+      if (window.location.hash) {
+        const initialFilter = window.location.hash.substring(1);
+        const matchedBtn = document.querySelector(`.filter-btn[data-filter="${initialFilter}"]`);
+        if (matchedBtn) {
+          filterCategory(initialFilter);
+        } else {
+          filterCategory("all");
+        }
       } else {
         filterCategory("all");
       }
-    } else {
-      filterCategory("all");
     }
-  }
 
-  window.addEventListener("hashchange", checkHash);
-  checkHash();
-});
+    window.addEventListener("hashchange", checkHash);
+    checkHash();
+  });
 </script>

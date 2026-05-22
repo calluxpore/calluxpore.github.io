@@ -6,6 +6,7 @@ categories:
 - Captioning
 - Human Cognition
 title: Why Did the Machine Describe It Better Than Me?
+image: /_assets/images/cover_02_captions.png
 ---
 
 It’s been a while since I built this LoRA evaluation project, but I still find myself thinking about one strange observation from it.

@@ -6,6 +6,7 @@ categories:
 - Computer Vision
 - Accessibility
 title: The Faces We Forget
+image: /_assets/images/cover_01_faces.png
 ---
 
 I kept thinking about how fragile recognition really is.
