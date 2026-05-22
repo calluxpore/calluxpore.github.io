@@ -17,17 +17,33 @@ OBSIDIAN_IMAGES_DIR = r"C:\Temp\Sammy.Decimal\90-99 🐙 Archives\98 Digital Arc
 JEKYLL_POSTS_DIR = "./_posts" 
 JEKYLL_IMAGES_DIR = "./_assets/images"
 
+def clean_alt_text(filename: str) -> str:
+    """Helper to clean a filename and generate a readable image alt text."""
+    name_part, _ = os.path.splitext(filename)
+    clean_name = name_part.replace('_', ' ').replace('-', ' ')
+    clean_name = re.sub(r'\s+', ' ', clean_name).strip()
+    return clean_name.capitalize()
+
 def process_images(markdown_content: str) -> str:
     """Finds ![[image]] tags, copies the files from Obsidian images folder to Jekyll _assets/images, 
-    and replaces tags with standard markdown image links.
+    and replaces tags with standard markdown image links. Handles optional alt text or width.
     """
-    # Pattern matches ![[filename.ext]] or ![[filename.ext|width]]
-    pattern = r'!\[\[([^\]|]+)(?:\|[^\]]*)?\]\]'
+    # Pattern matches ![[filename.ext]] or ![[filename.ext|alt_text_or_width]]
+    pattern = r'!\[\[([^\]|]+)(?:\|([^\]]*))?\]\]'
     
     def replace_match(match):
         original_filename = match.group(1).strip()
+        alt_or_width = match.group(2).strip() if match.group(2) else ""
         filename_lower = original_filename.lower()
         
+        # Check if alt_or_width is a width number (e.g., 300, 300x200)
+        is_width = bool(re.match(r'^\d+(?:x\d+)?$', alt_or_width))
+        
+        if alt_or_width and not is_width:
+            alt_text = alt_or_width
+        else:
+            alt_text = clean_alt_text(original_filename)
+            
         # Look for the file in the Obsidian images folder
         src_path = os.path.join(OBSIDIAN_IMAGES_DIR, original_filename)
         
@@ -57,7 +73,7 @@ def process_images(markdown_content: str) -> str:
                 shutil.copy2(src_path, dest_path)
                 print(f"📸 Copied image: '{original_filename}' -> '{dest_path}'")
                 # Return standard markdown image syntax pointing to the copied asset
-                return f"![{original_filename}](/_assets/images/{safe_filename})"
+                return f"![{alt_text}](/_assets/images/{safe_filename})"
             except Exception as e:
                 print(f"⚠️ Failed to copy image {original_filename}: {str(e)}")
                 return match.group(0) # Keep original if copy failed
@@ -66,6 +82,50 @@ def process_images(markdown_content: str) -> str:
             return match.group(0) # Keep original
             
     return re.sub(pattern, replace_match, markdown_content)
+
+
+def generate_description(content: str, max_len: int = 155) -> str:
+    """Auto-generates a clean plain text meta description from markdown content."""
+    # 1. Remove code blocks
+    text = re.sub(r'```.*?```', '', content, flags=re.DOTALL)
+    
+    # 2. Remove wiki image links ![[...]]
+    text = re.sub(r'!\[\[.*?\]\]', '', text)
+    
+    # 3. Remove standard image links ![alt](url)
+    text = re.sub(r'!\[.*?\]\(.*?\)', '', text)
+    
+    # 4. Replace standard markdown links [text](url) with just text
+    text = re.sub(r'\[(.*?)\]\(.*?\)', r'\1', text)
+    
+    # 5. Remove headers completely (lines starting with #)
+    text = re.sub(r'(?m)^#+.*$', '', text)
+    
+    # 6. Remove bullet/numbered list markers at start of lines
+    text = re.sub(r'(?m)^[-*+]\s+', '', text)
+    text = re.sub(r'(?m)^\d+\.\s+', '', text)
+    
+    # 7. Remove blockquote markers at start of lines
+    text = re.sub(r'(?m)^>\s*', '', text)
+    
+    # 8. Remove bold/italic/code markers
+    text = re.sub(r'\*\*|__|\*|_|`', '', text)
+    
+    # 9. Clean up whitespace and newlines
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    if not text:
+        return ""
+        
+    if len(text) <= max_len:
+        return text
+        
+    truncated = text[:max_len]
+    last_space = truncated.rfind(' ')
+    if last_space > max_len - 20:
+        truncated = truncated[:last_space]
+        
+    return truncated.strip() + "..."
 
 def publish_to_jekyll(title: str, clean_markdown: str, metadata: dict) -> bool:
     """Saves the content right into the Jekyll compilation pipeline."""
@@ -84,14 +144,36 @@ def publish_to_jekyll(title: str, clean_markdown: str, metadata: dict) -> bool:
         post['title'] = title
         post['date'] = date_str
         
-        # Handle categories and tags
+        # Handle categories (mapping tags to categories and deduplicating)
+        categories = []
         if 'tags' in metadata:
-            post['tags'] = metadata['tags']
-            post['categories'] = metadata['tags']  # Map tags to categories for Jekyll
+            tags_val = metadata['tags']
+            if isinstance(tags_val, list):
+                categories.extend(tags_val)
+            elif isinstance(tags_val, str):
+                categories.append(tags_val)
         if 'categories' in metadata:
-            post['categories'] = metadata['categories']
-            if 'tags' not in post:
-                post['tags'] = metadata['categories']
+            cats_val = metadata['categories']
+            if isinstance(cats_val, list):
+                categories.extend(cats_val)
+            elif isinstance(cats_val, str):
+                categories.append(cats_val)
+        
+        # De-duplicate while preserving order
+        unique_categories = []
+        for cat in categories:
+            if cat not in unique_categories:
+                unique_categories.append(cat)
+                
+        if unique_categories:
+            post['categories'] = unique_categories
+            
+        # Add description for SEO optimization
+        description = metadata.get('description', '').strip()
+        if not description:
+            description = generate_description(clean_markdown)
+        if description:
+            post['description'] = description
                 
         # Resolve and copy frontmatter image if specified
         if 'image' in metadata and metadata['image']:
