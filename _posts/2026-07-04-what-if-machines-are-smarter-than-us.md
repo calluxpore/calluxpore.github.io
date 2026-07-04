@@ -3,11 +3,11 @@ categories:
 - Artificial Intelligence
 - Machines
 - Human Intelligence
-date: '2026-07-04'
+date: 2026-07-04 11:00:00 +0530
 description: We build machines to outclass us. When we construct database engines,
   we aren't duplicating human memory with all its forgetfulness and nostalgia; we
   are...
-image: /_assets/images/cover-05.png
+image: /_assets/images/cover_05.png
 layout: post
 title: What if Machines are smarter than us
 ---
