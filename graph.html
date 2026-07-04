@@ -107,12 +107,8 @@ permalink: /graph/
     stroke-width: 3px;
     stroke-linejoin: round;
     fill: var(--text-muted);
-    transition: fill var(--transition-speed) ease, font-weight var(--transition-speed) ease;
-  }
-
-  .graph-node:hover text {
-    fill: var(--text-main);
-    font-weight: 500;
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.25s ease, font-size 0.25s ease, font-weight 0.25s ease, fill 0.25s ease;
   }
 
   .graph-link {
@@ -247,6 +243,8 @@ permalink: /graph/
     // 5. Tooltip interaction logic with hover safety delay
     const tooltip = document.getElementById('graph-tooltip');
     let tooltipTimeout = null;
+    let activeDraggedNode = null;
+    let hoveredNode = null;
 
     function showTooltip(d, event) {
       clearTimeout(tooltipTimeout);
@@ -303,6 +301,8 @@ permalink: /graph/
 
     // Node mouse hover interactivity
     node.on('mouseover', function(event, d) {
+      hoveredNode = d;
+
       // Highlight hovered node circle
       d3.select(this).select('circle')
         .attr('fill', 'var(--accent-color)')
@@ -313,9 +313,32 @@ permalink: /graph/
         .attr('stroke', l => (l.source.id === d.id || l.target.id === d.id) ? 'var(--accent-color)' : 'rgba(31, 35, 40, 0.05)')
         .attr('stroke-opacity', l => (l.source.id === d.id || l.target.id === d.id) ? 0.8 : 0.15);
 
+      // Find connected tags to display their labels as well
+      const connectedTagIds = new Set();
+      links.forEach(l => {
+        if (l.source.id === d.id) connectedTagIds.add(l.target.id);
+        if (l.target.id === d.id) connectedTagIds.add(l.source.id);
+      });
+
+      // Update text labels opacity and style (with zoom effect on hovered)
+      node.select('text')
+        .style('opacity', n => {
+          if (n.id === d.id) return 1;          // hovered tag fully visible
+          if (connectedTagIds.has(n.id)) return 0.55; // neighboring tags semi-visible
+          return 0;                             // others hidden
+        })
+        .style('font-size', n => n.id === d.id ? '0.82rem' : '0.72rem')
+        .style('font-weight', n => n.id === d.id ? '600' : '400')
+        .style('fill', n => n.id === d.id ? 'var(--accent-color)' : 'var(--text-muted)');
+
       showTooltip(d, event);
     })
     .on('mouseout', function(event, d) {
+      hoveredNode = null;
+
+      // Don't restore if this node is currently being dragged
+      if (activeDraggedNode === d) return;
+
       // Restore node circle
       d3.select(this).select('circle')
         .attr('fill', '#94a3b8')
@@ -325,6 +348,13 @@ permalink: /graph/
       link
         .attr('stroke', 'rgba(31, 35, 40, 0.08)')
         .attr('stroke-opacity', 0.5);
+
+      // Hide all labels again
+      node.select('text')
+        .style('opacity', 0)
+        .style('font-size', '0.72rem')
+        .style('font-weight', '400')
+        .style('fill', 'var(--text-muted)');
 
       hideTooltip();
     });
@@ -357,6 +387,14 @@ permalink: /graph/
         if (!event.active) sim.alphaTarget(0.3).restart();
         d.fx = d.x;
         d.fy = d.y;
+        activeDraggedNode = d;
+
+        // Ensure current label is visible during drag
+        d3.select(this).select('text')
+          .style('opacity', 1)
+          .style('font-size', '0.82rem')
+          .style('font-weight', '600')
+          .style('fill', 'var(--accent-color)');
       }
 
       function dragged(event, d) {
@@ -368,6 +406,24 @@ permalink: /graph/
         if (!event.active) sim.alphaTarget(0);
         d.fx = null;
         d.fy = null;
+        activeDraggedNode = null;
+
+        // If the mouse is no longer hovering over this node, reset its visual state
+        if (hoveredNode !== d) {
+          d3.select(this).select('circle')
+            .attr('fill', '#94a3b8')
+            .attr('stroke-width', '2px');
+
+          link
+            .attr('stroke', 'rgba(31, 35, 40, 0.08)')
+            .attr('stroke-opacity', 0.5);
+
+          d3.select(this).select('text')
+            .style('opacity', 0)
+            .style('font-size', '0.72rem')
+            .style('font-weight', '400')
+            .style('fill', 'var(--text-muted)');
+        }
       }
 
       return d3.drag()
