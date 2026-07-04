@@ -177,9 +177,20 @@ def publish_to_jekyll(title: str, clean_markdown: str, metadata: dict) -> bool:
                 
         # Resolve and copy frontmatter image if specified
         if 'image' in metadata and metadata['image']:
-            raw_img_path = str(metadata['image']).strip()
-            # Strip wiki-link syntax [[image.png]] if present
-            raw_img_path = re.sub(r'^\[\[(.*)\]\]$', r'\1', raw_img_path).strip()
+            img_val = metadata['image']
+            while isinstance(img_val, (list, tuple)):
+                if len(img_val) > 0:
+                    img_val = img_val[0]
+                else:
+                    img_val = ""
+                    break
+            
+            raw_img_path = str(img_val).strip().strip('"').strip("'")
+            # Strip wiki-link syntax [[image.png]] or [[image.png|alt]] if present
+            match = re.search(r'\[\[?([^\]|]+)(?:\|[^\]]*)?\]?\]', raw_img_path)
+            if match:
+                raw_img_path = match.group(1).strip()
+            
             
             src_path = os.path.join(OBSIDIAN_IMAGES_DIR, raw_img_path)
             if not os.path.exists(src_path):
