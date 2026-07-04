@@ -7,14 +7,12 @@ date: '2026-07-04'
 description: We build machines to outclass us. When we construct database engines,
   we aren't duplicating human memory with all its forgetfulness and nostalgia; we
   are...
-image: /_assets/images/cover_05.png
+image: /_assets/images/cover-05.png
 layout: post
 title: What if Machines are smarter than us
 ---
 
 We build machines to outclass us.
-
-![Image what if](/_assets/images/image--what-if.png)
 
 When we construct database engines, we aren't duplicating human memory with all its forgetfulness and nostalgia; we are building something that never forgets. A surgical robotic arm doesn't replicate our hand-tremors; it achieves flawless, micro-millimeter precision. We design them to be better because we recognize our own physical and cognitive limitations. They don't need to be human; they just need to be exceptionally good at what they do.
 
