@@ -1,12 +1,12 @@
 ---
-date: '2026-05-22'
-layout: post
 categories:
 - Artificial Intelligence
 - Computer Vision
 - Accessibility
-title: The Faces We Forget
+date: '2026-05-22'
 image: /_assets/images/cover_01_faces.png
+layout: post
+title: The Faces We Forget
 ---
 
 I kept thinking about how fragile recognition really is.

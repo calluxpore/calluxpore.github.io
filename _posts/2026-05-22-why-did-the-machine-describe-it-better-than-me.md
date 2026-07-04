@@ -1,12 +1,12 @@
 ---
-date: '2026-05-22'
-layout: post
 categories:
 - Artificial Intelligence
 - Captioning
 - Human Cognition
-title: Why Did the Machine Describe It Better Than Me?
+date: '2026-05-22'
 image: /_assets/images/cover_02_captions.png
+layout: post
+title: Why Did the Machine Describe It Better Than Me?
 ---
 
 It’s been a while since I built this LoRA evaluation project, but I still find myself thinking about one strange observation from it.
