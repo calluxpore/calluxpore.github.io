@@ -4,7 +4,7 @@ categories:
 - Computer Vision
 - Accessibility
 date: '2026-05-22'
-image: /_assets/images/cover_01_faces.png
+image: /_assets/images/cover_01.png
 layout: post
 title: The Faces We Forget
 ---

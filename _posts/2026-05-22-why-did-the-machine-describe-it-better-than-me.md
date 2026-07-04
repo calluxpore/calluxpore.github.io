@@ -4,7 +4,7 @@ categories:
 - Captioning
 - Human Cognition
 date: '2026-05-22'
-image: /_assets/images/cover_02_captions.png
+image: /_assets/images/cover_02.png
 layout: post
 title: Why Did the Machine Describe It Better Than Me?
 ---

@@ -6,7 +6,7 @@ categories:
 date: '2026-05-23'
 description: Three years ago, I became obsessed with the language from Arrival. Not
   the spoken one, though that fascinated me too. The whale-like groans. The clicks....
-image: /_assets/images/cover_03_vl.png
+image: /_assets/images/cover_03.png
 layout: post
 title: Teaching Machines an Alien Language
 ---

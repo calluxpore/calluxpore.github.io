@@ -7,7 +7,7 @@ date: '2026-07-04'
 description: We build machines to outclass us. When we construct database engines,
   we aren't duplicating human memory with all its forgetfulness and nostalgia; we
   are...
-image: /_assets/images/cover_05_smarter.png
+image: /_assets/images/cover_05.png
 layout: post
 title: What if Machines are smarter than us
 ---
