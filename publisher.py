@@ -12,8 +12,8 @@ if sys.platform.startswith('win'):
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 # --- CONFIGURATION PATHS ---
-OBSIDIAN_POSTS_DIR = r"D:\Vault\Sammy.Decimal\80-89 🦋 Documents\86 Writing"
-OBSIDIAN_IMAGES_DIR = r"D:\Vault\Sammy.Decimal\90-99 🐙 Archives\98 Digital Archives"
+OBSIDIAN_POSTS_DIR = r"E:\Vault\Sammy.Decimal\80-89 🦋 Documents\86 Writing"
+OBSIDIAN_IMAGES_DIR = r"E:\Vault\Sammy.Decimal\90-99 🐙 Archives\98 Digital Archives"
 JEKYLL_POSTS_DIR = "./_posts" 
 JEKYLL_IMAGES_DIR = "./_assets/images"
 
