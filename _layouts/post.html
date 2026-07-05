@@ -25,6 +25,14 @@ layout: default
         {% endif %}
       </span>
     </div>
+    
+    {% if page.categories.size > 0 %}
+    <div class="post-categories-container" style="justify-content: center; margin-top: 1rem; margin-bottom: 0;">
+      {% for category in page.categories %}
+      <span class="post-category-tag">{{ category | escape }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
   </header>
 
   {% assign post_name = page.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' %}
