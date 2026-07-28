@@ -26,6 +26,15 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://calluxpore.github.io" # the base hostname & protocol for your site
 github_username:  calluxpore
 
+# Feed & Site Icon Settings
+icon: "/_assets/images/icon.png"
+logo: "/_assets/images/icon.png"
+
+feed:
+  path: feed.xml
+  icon: "/_assets/images/icon.png"
+  logo: "/_assets/images/icon.png"
+
 # Build settings
 # theme: minima
 plugins:
