@@ -26,7 +26,8 @@ layout: null
       <published>{{ post.date | date_to_xmlschema }}</published>
       <updated>{{ post.last_modified_at | default: post.date | date_to_xmlschema }}</updated>
       <id>{{ post.id | absolute_url }}</id>
-      <content type="html" xml:base="{{ post.url | absolute_url }}">{{ post.content | xml_escape }}</content>
+      {% assign full_content = post.content | replace: 'src="/', 'src="https://calluxpore.github.io/' %}
+      <content type="html" xml:base="{{ post.url | absolute_url }}">{{ full_content | xml_escape }}</content>
       {% if post.author %}
         <author><name>{{ post.author | xml_escape }}</name></author>
       {% endif %}
@@ -35,7 +36,6 @@ layout: null
       {% endfor %}
       {% if post.image %}
         <media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="{{ post.image | absolute_url }}"/>
-        <media:content medium="image" url="{{ post.image | absolute_url }}" xmlns:media="http://search.yahoo.com/mrss/"/>
       {% endif %}
     </entry>
   {% endfor %}
