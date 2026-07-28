@@ -2,7 +2,7 @@
 layout: null
 ---
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:webfeeds="http://webfeeds.org/rss/1.0">
   <generator uri="https://jekyllrb.com/" version="{{ jekyll.version }}">Jekyll</generator>
   <link href="{{ '/feed.xml' | absolute_url }}" rel="self" type="application/atom+xml"/>
   <link href="{{ '/' | absolute_url }}" rel="alternate" type="text/html"/>
@@ -27,7 +27,12 @@ layout: null
       <updated>{{ post.last_modified_at | default: post.date | date_to_xmlschema }}</updated>
       <id>{{ post.id | absolute_url }}</id>
       {% assign full_content = post.content | replace: 'src="/', 'src="https://calluxpore.github.io/' %}
-      <content type="html" xml:base="{{ post.url | absolute_url }}">{{ full_content | xml_escape }}</content>
+      <content type="html" xml:base="{{ post.url | absolute_url }}">
+        {% if post.image %}
+          &lt;p&gt;&lt;img src=&quot;{{ post.image | absolute_url }}&quot; alt=&quot;{{ post.title | xml_escape }}&quot; class=&quot;webfeed-default-thumbnail&quot; style=&quot;max-width:100%; border-radius:8px; margin-bottom:1.5rem;&quot; /&gt;&lt;/p&gt;
+        {% endif %}
+        {{ full_content | xml_escape }}
+      </content>
       {% if post.author %}
         <author><name>{{ post.author | xml_escape }}</name></author>
       {% endif %}
@@ -35,7 +40,9 @@ layout: null
         <category term="{{ category | xml_escape }}"/>
       {% endfor %}
       {% if post.image %}
-        <media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="{{ post.image | absolute_url }}"/>
+        <webfeeds:cover image="{{ post.image | absolute_url }}" />
+        <media:thumbnail url="{{ post.image | absolute_url }}" width="1200" height="630" />
+        <media:content url="{{ post.image | absolute_url }}" medium="image" type="image/png" width="1200" height="630" isDefault="true" />
       {% endif %}
     </entry>
   {% endfor %}
