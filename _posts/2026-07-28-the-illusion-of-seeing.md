@@ -6,7 +6,7 @@ categories:
 - Artificial Intelligence
 date: '2026-07-28'
 description: When you look at an apple on a table, it feels like you are looking through
-  a clear window. Light hits your eyes, and you see the apple. [[Perseption and...
+  a clear window. Light hits your eyes, and you see the apple. In reality,...
 image: /_assets/images/cover-08.png
 layout: post
 title: The Illusion of Seeing
@@ -14,7 +14,7 @@ title: The Illusion of Seeing
 
 When you look at an apple on a table, it feels like you are looking through a clear window. Light hits your eyes, and you see the apple.
 
-[[Perseption and Vision.png]]
+![Pv 8](/_assets/images/pv-8.png)
 
 In reality, seeing is split into two very different steps: vision and perception.
 
