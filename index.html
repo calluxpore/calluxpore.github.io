@@ -74,6 +74,15 @@ title: Home
 
   <ul class="posts-list">
     {% for post in site.posts %}
+    {% assign post_name = post.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' %}
+    {% assign target_audio_name = post_name | append: '.mp3' %}
+    {% assign has_audio = false %}
+    {% for static_file in site.static_files %}
+      {% if static_file.name == target_audio_name %}
+        {% assign has_audio = true %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
     <li class="post-item"
       data-categories="all,{% for category in post.categories %}{{ category | downcase | replace: ' ', '-' }}{% if forloop.last == false %},{% endif %}{% endfor %}">
       
@@ -98,7 +107,17 @@ title: Home
           <span>•</span>
           <span>
             {% assign words = post.content | number_of_words %}
-            {% if words < 360 %} 1 min read {% else %} {{ words | divided_by: 180 }} min read {% endif %} </span>
+            {% if words < 360 %} 1 min read {% else %} {{ words | divided_by: 180 }} min read {% endif %}
+          </span>
+          {% if has_audio %}
+          <span>•</span>
+          <span class="audio-badge" title="Audio version available" style="display: inline-flex; align-items: center; gap: 3px; font-weight: 500; color: var(--accent-color);">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+            </svg>
+            Audio
+          </span>
+          {% endif %}
         </div>
 
         <!-- Post Title -->
@@ -108,7 +127,7 @@ title: Home
 
         <!-- Post Excerpt -->
         <p class="post-excerpt">
-          {{ post.excerpt | strip_html | truncatewords: 30 }}
+          {{ post.description | default: post.excerpt | strip_html | truncatewords: 30 }}
         </p>
 
         <!-- Post Categories -->
@@ -120,8 +139,18 @@ title: Home
         </div>
         {% endif %}
 
-        <!-- Read Link -->
-        <a class="read-more-link" href="{{ post.url | relative_url }}">Read Article</a>
+        <!-- Actions -->
+        <div class="post-item-actions" style="display: flex; align-items: center; gap: 1.25rem;">
+          <a class="read-more-link" href="{{ post.url | relative_url }}">Read Article</a>
+          {% if has_audio %}
+          <a class="listen-audio-link" href="{{ post.url | relative_url }}#tts-audio" style="font-size: 0.85rem; color: var(--accent-color); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; transition: opacity var(--transition-speed);" title="Listen to Audio Version">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            Listen
+          </a>
+          {% endif %}
+        </div>
       </div>
     </li>
     {% endfor %}

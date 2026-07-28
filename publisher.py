@@ -5,6 +5,8 @@ import re
 import shutil
 import sys
 import io
+import asyncio
+import edge_tts
 
 # Set encoding for standard streams to UTF-8 to prevent encoding crashes on Windows console
 if sys.platform.startswith('win'):
@@ -12,10 +14,96 @@ if sys.platform.startswith('win'):
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 # --- CONFIGURATION PATHS ---
-OBSIDIAN_POSTS_DIR = r"E:\Vault\Sammy.Decimal\80-89 🦋 Documents\86 Writing"
-OBSIDIAN_IMAGES_DIR = r"E:\Vault\Sammy.Decimal\90-99 🐙 Archives\98 Digital Archives"
+def _resolve_vault_path(subpath: str) -> str:
+    for drive in ["D:", "E:", "C:"]:
+        candidate = os.path.join(f"{drive}\\", "Vault", "Sammy.Decimal", subpath)
+        if os.path.exists(candidate):
+            return candidate
+    return os.path.join(r"D:\Vault\Sammy.Decimal", subpath)
+
+OBSIDIAN_POSTS_DIR = _resolve_vault_path(r"80-89 🦋 Documents\86 Writing")
+OBSIDIAN_IMAGES_DIR = _resolve_vault_path(r"90-99 🐙 Archives\98 Digital Archives")
 JEKYLL_POSTS_DIR = "./_posts" 
 JEKYLL_IMAGES_DIR = "./_assets/images"
+JEKYLL_TTS_DIR = "./_assets/TTS"
+DEFAULT_TTS_VOICE = "en-US-AvaNeural"
+
+def strip_markdown_for_speech(content: str) -> str:
+    """Cleans markdown content into plain readable text suitable for TTS voice synthesis."""
+    # 1. Remove code blocks ```...```
+    text = re.sub(r'```.*?```', '', content, flags=re.DOTALL)
+    
+    # 2. Remove wiki image links ![[...]]
+    text = re.sub(r'!\[\[.*?\]\]', '', text)
+    
+    # 3. Remove standard image links ![alt](url)
+    text = re.sub(r'!\[.*?\]\(.*?\)', '', text)
+    
+    # 4. Replace standard markdown links [text](url) with just text
+    text = re.sub(r'\[(.*?)\]\(.*?\)', r'\1', text)
+    
+    # 5. Remove header markers # Header -> Header
+    text = re.sub(r'(?m)^#+\s*', '', text)
+    
+    # 6. Remove bullet/numbered list markers at start of lines
+    text = re.sub(r'(?m)^[-*+]\s+', '', text)
+    text = re.sub(r'(?m)^\d+\.\s+', '', text)
+    
+    # 7. Remove blockquote markers at start of lines
+    text = re.sub(r'(?m)^>\s*', '', text)
+    
+    # 8. Remove bold/italic/code markers
+    text = re.sub(r'\*\*|__|\*|_|`', '', text)
+    
+    # 9. Clean up excess blank lines and whitespace
+    text = re.sub(r'\n\s*\n', '\n\n', text)
+    return text.strip()
+
+def generate_tts_for_post(post_name: str, content: str, voice: str = DEFAULT_TTS_VOICE) -> str:
+    """Generates an MP3 audio file in JEKYLL_TTS_DIR using edge-tts if it does not already exist."""
+    os.makedirs(JEKYLL_TTS_DIR, exist_ok=True)
+    audio_filename = f"{post_name}.mp3"
+    dest_path = os.path.join(JEKYLL_TTS_DIR, audio_filename)
+    
+    if os.path.exists(dest_path):
+        print(f"🔊 Audio file already exists: '{dest_path}'")
+        return dest_path
+        
+    plain_text = strip_markdown_for_speech(content)
+    if not plain_text.strip():
+        print(f"⚠️ Skipping TTS for '{post_name}': no readable text found.")
+        return None
+        
+    print(f"🎙️ Synthesizing TTS audio for '{post_name}' using edge-tts ({voice})...")
+    try:
+        async def _speak():
+            communicate = edge_tts.Communicate(plain_text, voice)
+            await communicate.save(dest_path)
+            
+        asyncio.run(_speak())
+        print(f"✅ Generated TTS audio: '{dest_path}'")
+        return dest_path
+    except Exception as e:
+        print(f"❌ Error generating TTS audio for '{post_name}': {str(e)}")
+        return None
+
+def process_existing_posts_tts():
+    """Scans all posts in JEKYLL_POSTS_DIR and auto-generates missing TTS audio files."""
+    if not os.path.exists(JEKYLL_POSTS_DIR):
+        return
+        
+    print("\n🎧 Checking TTS audio files for all existing posts...")
+    for file in sorted(os.listdir(JEKYLL_POSTS_DIR)):
+        if file.endswith('.md') or file.endswith('.markdown'):
+            post_name = os.path.splitext(file)[0]
+            audio_path = os.path.join(JEKYLL_TTS_DIR, f"{post_name}.mp3")
+            if not os.path.exists(audio_path):
+                post_path = os.path.join(JEKYLL_POSTS_DIR, file)
+                try:
+                    post = frontmatter.load(post_path)
+                    generate_tts_for_post(post_name, post.content)
+                except Exception as e:
+                    print(f"⚠️ Could not load post '{file}' for TTS: {str(e)}")
 
 def clean_alt_text(filename: str) -> str:
     """Helper to clean a filename and generate a readable image alt text."""
@@ -232,6 +320,11 @@ def publish_to_jekyll(title: str, clean_markdown: str, metadata: dict) -> bool:
             frontmatter.dump(post, f)
             
         print(f"🎉 Successfully generated Jekyll file: {file_name}")
+
+        # Generate TTS audio file for the post
+        post_name = file_name.replace('.md', '')
+        generate_tts_for_post(post_name, clean_markdown)
+
         return True
     except Exception as e:
         print(f"❌ Error writing to Jekyll: {str(e)}")
@@ -251,6 +344,8 @@ def run_pipeline():
     
     if not os.path.exists(OBSIDIAN_POSTS_DIR):
         print(f"❌ Error: The path '{OBSIDIAN_POSTS_DIR}' does not exist. Please check your folder naming.")
+        # Even if obsidian dir is not found, check existing posts for missing TTS audio
+        process_existing_posts_tts()
         return
 
     processed_count = 0
@@ -288,6 +383,9 @@ def run_pipeline():
                     
     if processed_count == 0:
         print("😴 No new notes marked 'status: publish' found. Everything is up to date!")
+
+    # Check and generate TTS audio files for all existing posts
+    process_existing_posts_tts()
 
 if __name__ == "__main__":
     run_pipeline()
