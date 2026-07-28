@@ -50,9 +50,9 @@ permalink: /graph/
     font-family: var(--font-poppins);
     font-size: 0.85rem;
     outline: none;
-    background-color: #ffffff;
+    background-color: var(--card-bg);
     color: var(--text-main);
-    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease, background-color var(--transition-speed) ease;
   }
 
   #graph-search:focus {
@@ -75,10 +75,10 @@ permalink: /graph/
     top: 100%;
     left: 0;
     width: 100%;
-    background-color: #ffffff;
+    background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     z-index: 20;
     max-height: 200px;
     overflow-y: auto;
@@ -106,16 +106,18 @@ permalink: /graph/
     margin: 1.5rem 0;
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    background-color: #ffffff;
+    background-color: var(--card-bg);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.005), 0 4px 12px rgba(0, 0, 0, 0.015);
     overflow: hidden;
+    transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
   }
 
   #graph-container {
     width: 100%;
     height: 550px;
-    background-color: #ffffff;
+    background-color: var(--bg-color);
     cursor: grab;
+    transition: background-color var(--transition-speed) ease;
   }
 
   #graph-container:active {
@@ -125,18 +127,18 @@ permalink: /graph/
   /* Tooltip styling */
   .graph-tooltip {
     position: absolute;
-    background-color: #ffffff;
+    background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 0.75rem 1rem;
     font-family: var(--font-poppins);
     font-size: 0.82rem;
-    box-shadow: 0 10px 25px rgba(31, 35, 40, 0.08);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     z-index: 10;
     width: 260px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.15s ease-in-out;
+    transition: opacity 0.15s ease-in-out, background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
   }
 
   .graph-tooltip-title {
@@ -179,10 +181,10 @@ permalink: /graph/
 
   /* SVG elements styling */
   .graph-node circle {
-    stroke: #ffffff;
+    stroke: var(--card-bg);
     stroke-width: 2px;
     cursor: pointer;
-    transition: fill var(--transition-speed) ease, stroke-width var(--transition-speed) ease, opacity var(--transition-speed) ease;
+    transition: fill var(--transition-speed) ease, stroke var(--transition-speed) ease, stroke-width var(--transition-speed) ease, opacity var(--transition-speed) ease;
   }
 
   .graph-node text {
@@ -191,16 +193,16 @@ permalink: /graph/
     pointer-events: none;
     user-select: none;
     paint-order: stroke;
-    stroke: #ffffff;
+    stroke: var(--bg-color);
     stroke-width: 3px;
     stroke-linejoin: round;
     fill: var(--text-muted);
-    transition: opacity 0.25s ease, font-size 0.25s ease, font-weight 0.25s ease, fill 0.25s ease;
+    transition: opacity 0.25s ease, font-size 0.25s ease, font-weight 0.25s ease, fill 0.25s ease, stroke 0.25s ease;
   }
 
   .graph-link {
-    stroke: rgba(31, 35, 40, 0.08);
-    stroke-opacity: 0.5;
+    stroke: var(--border-color);
+    stroke-opacity: 0.7;
     transition: stroke var(--transition-speed) ease, stroke-opacity var(--transition-speed) ease;
   }
 
@@ -212,11 +214,11 @@ permalink: /graph/
     flex-direction: column;
     gap: 2px;
     z-index: 5;
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 2px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   .graph-controls-box button {

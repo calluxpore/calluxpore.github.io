@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="{{ page.lang | default: site.lang | default: 'en' }}">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍁</text></svg>">
-  
-  {% seo %}
-  {% if site.plugins contains 'jekyll-feed' %}
-    <link rel="alternate" type="application/rss+xml" title="{{ site.title | escape }}" href="{{ '/feed.xml' | relative_url }}">
-  {% endif %}
+  <script>
+    (function() {
+      var savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
 
   <!-- Stylesheet -->
   <style>
@@ -19,6 +19,7 @@
     :root {
       /* Color Palette - Light Mode (Clean Code) */
       --bg-color: #fafafa;
+      --card-bg: #ffffff;
       --text-main: #1f2328;
       --text-muted: #57606a;
       --accent-color: #0969da;
@@ -26,13 +27,38 @@
       --border-color: rgba(31, 35, 40, 0.1);
       --code-bg: #f3f4f6;
       --code-text: #cf222e;
+      --blockquote-bg: rgba(9, 105, 218, 0.03);
+      --cell-level-0: #ebedf0;
+      --cell-level-1: #9be9a8;
+      --cell-level-2: #40c463;
+      --cell-level-3: #30a14e;
+      --cell-level-4: #216e39;
       --container-width: 720px;
       
       --font-poppins: 'Poppins', sans-serif;
       --font-sans: 'Merriweather', Georgia, serif;
       --font-mono: 'JetBrains Mono', Consolas, Monaco, monospace;
       
-      --transition-speed: 0.15s;
+      --transition-speed: 0.2s;
+    }
+
+    [data-theme="dark"] {
+      /* Color Palette - Dark Mode (Sleek Tech Theme) */
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --text-main: #e6edf3;
+      --text-muted: #8b949e;
+      --accent-color: #58a6ff;
+      --accent-hover: #3fb950;
+      --border-color: rgba(240, 246, 252, 0.15);
+      --code-bg: #161b22;
+      --code-text: #ff7b72;
+      --blockquote-bg: rgba(88, 166, 255, 0.08);
+      --cell-level-0: #21262d;
+      --cell-level-1: #0e4429;
+      --cell-level-2: #006d32;
+      --cell-level-3: #26a641;
+      --cell-level-4: #39d353;
     }
 
     /* Base Styles */
@@ -196,7 +222,7 @@
       line-height: 1.5;
       color: var(--text-muted);
       font-style: italic;
-      background-color: rgba(79, 70, 229, 0.02);
+      background-color: var(--blockquote-bg);
       border-radius: 0 8px 8px 0;
     }
 
@@ -256,6 +282,16 @@
     .highlight .nb { color: #c82829; } /* Built-in */
     .highlight .nf { color: #4271ae; } /* Function */
     .highlight .nt { color: #c82829; } /* Tag */
+
+    /* Syntax Highlighting - Dark Mode */
+    [data-theme="dark"] .highlight .c { color: #8b949e; }
+    [data-theme="dark"] .highlight .k { color: #ff7b72; }
+    [data-theme="dark"] .highlight .s { color: #a5d6ff; }
+    [data-theme="dark"] .highlight .n { color: #e6edf3; }
+    [data-theme="dark"] .highlight .o { color: #79c0ff; }
+    [data-theme="dark"] .highlight .nb { color: #ffa657; }
+    [data-theme="dark"] .highlight .nf { color: #d2a8ff; }
+    [data-theme="dark"] .highlight .nt { color: #7ee787; }
 
 
     /* Footers */
@@ -443,7 +479,7 @@
     .post-item-image-placeholder {
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, var(--border-color) 0%, rgba(31, 35, 40, 0.05) 100%);
+      background: linear-gradient(135deg, var(--border-color) 0%, var(--code-bg) 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -686,15 +722,16 @@
 
     /* Activity Calendar Panel */
     .activity-panel-card {
-      background-color: #ffffff;
+      background-color: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 1.25rem;
       margin-bottom: 2.5rem;
-      box-shadow: 0 1px 3px rgba(31, 35, 40, 0.04);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
     }
 
     .activity-panel-header {
@@ -803,16 +840,16 @@
     }
 
     .calendar-cell.is-future {
-      background-color: #ebedf0;
+      background-color: var(--cell-level-0);
       opacity: 0.25;
       cursor: default;
     }
 
-    .calendar-cell.level-0 { background-color: #ebedf0; }
-    .calendar-cell.level-1 { background-color: #9be9a8; }
-    .calendar-cell.level-2 { background-color: #40c463; }
-    .calendar-cell.level-3 { background-color: #30a14e; }
-    .calendar-cell.level-4 { background-color: #216e39; }
+    .calendar-cell.level-0 { background-color: var(--cell-level-0); }
+    .calendar-cell.level-1 { background-color: var(--cell-level-1); }
+    .calendar-cell.level-2 { background-color: var(--cell-level-2); }
+    .calendar-cell.level-3 { background-color: var(--cell-level-3); }
+    .calendar-cell.level-4 { background-color: var(--cell-level-4); }
 
     .activity-panel-footer {
       display: flex;
@@ -837,11 +874,50 @@
       border-radius: 2px;
     }
     
-    .legend-cell.level-0 { background-color: #ebedf0; }
-    .legend-cell.level-1 { background-color: #9be9a8; }
-    .legend-cell.level-2 { background-color: #40c463; }
-    .legend-cell.level-3 { background-color: #30a14e; }
-    .legend-cell.level-4 { background-color: #216e39; }
+    .legend-cell.level-0 { background-color: var(--cell-level-0); }
+    .legend-cell.level-1 { background-color: var(--cell-level-1); }
+    .legend-cell.level-2 { background-color: var(--cell-level-2); }
+    .legend-cell.level-3 { background-color: var(--cell-level-3); }
+    .legend-cell.level-4 { background-color: var(--cell-level-4); }
+
+    /* Theme Toggle Button */
+    .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.4rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color var(--transition-speed) ease, border-color var(--transition-speed) ease, background-color var(--transition-speed) ease, transform 0.15s ease;
+      line-height: 1;
+      margin-left: 0.5rem;
+    }
+
+    .theme-toggle-btn:hover {
+      color: var(--text-main);
+      border-color: var(--text-muted);
+      background-color: var(--code-bg);
+      transform: scale(1.05);
+    }
+
+    .theme-toggle-btn .sun-icon {
+      display: none;
+    }
+
+    .theme-toggle-btn .moon-icon {
+      display: block;
+    }
+
+    [data-theme="dark"] .theme-toggle-btn .sun-icon {
+      display: block;
+    }
+
+    [data-theme="dark"] .theme-toggle-btn .moon-icon {
+      display: none;
+    }
 
     /* Custom Tooltip styling */
     .contrib-tooltip {
@@ -879,6 +955,24 @@
           {% endif %}
         {% endfor %}
         <a class="nav-link" href="https://portfolio-5208db.webflow.io/" target="_blank" rel="noopener noreferrer">Main Portfolio</a>
+        
+        <!-- Dark Mode Toggle Button -->
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme" title="Toggle theme">
+          <svg class="sun-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
       </nav>
     </div>
   </header>
@@ -917,6 +1011,21 @@
       </div>
     </div>
   </footer>
+
+  <!-- Theme Toggle Script -->
+  <script>
+    (function() {
+      var toggleBtn = document.getElementById('theme-toggle');
+      if (!toggleBtn) return;
+      
+      toggleBtn.addEventListener('click', function() {
+        var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+      });
+    })();
+  </script>
 
 </body>
 </html>
