@@ -1,0 +1,42 @@
+---
+layout: null
+---
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <generator uri="https://jekyllrb.com/" version="{{ jekyll.version }}">Jekyll</generator>
+  <link href="{{ '/feed.xml' | absolute_url }}" rel="self" type="application/atom+xml"/>
+  <link href="{{ '/' | absolute_url }}" rel="alternate" type="text/html"/>
+  <updated>{{ site.time | date_to_xmlschema }}</updated>
+  <id>{{ '/feed.xml' | absolute_url }}</id>
+  <title type="html">{{ site.title | xml_escape }}</title>
+  {% if site.description %}
+    <subtitle>{{ site.description | xml_escape }}</subtitle>
+  {% endif %}
+  <icon>{{ '/_assets/images/icon.png' | absolute_url }}</icon>
+  <logo>{{ '/_assets/images/icon.png' | absolute_url }}</logo>
+  <image>
+    <url>{{ '/_assets/images/icon.png' | absolute_url }}</url>
+    <title>{{ site.title | xml_escape }}</title>
+    <link>{{ '/' | absolute_url }}</link>
+  </image>
+  {% for post in site.posts limit:30 %}
+    <entry>
+      <title type="html">{{ post.title | xml_escape }}</title>
+      <link href="{{ post.url | absolute_url }}" rel="alternate" type="text/html" title="{{ post.title | xml_escape }}"/>
+      <published>{{ post.date | date_to_xmlschema }}</published>
+      <updated>{{ post.last_modified_at | default: post.date | date_to_xmlschema }}</updated>
+      <id>{{ post.id | absolute_url }}</id>
+      <content type="html" xml:base="{{ post.url | absolute_url }}">{{ post.content | xml_escape }}</content>
+      {% if post.author %}
+        <author><name>{{ post.author | xml_escape }}</name></author>
+      {% endif %}
+      {% for category in post.categories %}
+        <category term="{{ category | xml_escape }}"/>
+      {% endfor %}
+      {% if post.image %}
+        <media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="{{ post.image | absolute_url }}"/>
+        <media:content medium="image" url="{{ post.image | absolute_url }}" xmlns:media="http://search.yahoo.com/mrss/"/>
+      {% endif %}
+    </entry>
+  {% endfor %}
+</feed>
