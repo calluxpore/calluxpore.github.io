@@ -28,6 +28,35 @@ title: Home
 <!-- Posts List Section -->
 <section class="posts-section">
   {% if site.posts.size > 0 %}
+
+  <!-- Activity Calendar Panel -->
+  <div class="activity-panel-card">
+    <div class="activity-panel-header">
+      <span class="activity-panel-summary" id="activity-summary">
+        <strong>0 articles</strong> in the last year
+      </span>
+      <div class="year-selector" id="year-selector"></div>
+    </div>
+    <div class="activity-grid-scroll-container">
+      <div class="calendar-board" id="calendar-board">
+        <span class="weekday-label" style="grid-column: 1; grid-row: 3;">Mon</span>
+        <span class="weekday-label" style="grid-column: 1; grid-row: 5;">Wed</span>
+        <span class="weekday-label" style="grid-column: 1; grid-row: 7;">Fri</span>
+      </div>
+    </div>
+    <div class="activity-panel-footer">
+      <div class="activity-legend">
+        <span>Less</span>
+        <div class="legend-cell level-0"></div>
+        <div class="legend-cell level-1"></div>
+        <div class="legend-cell level-2"></div>
+        <div class="legend-cell level-3"></div>
+        <div class="legend-cell level-4"></div>
+        <span>More</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Category Filter Navigation -->
   {% if all_categories.size > 0 %}
   <div class="category-filter-nav">
@@ -103,6 +132,14 @@ title: Home
   {% endif %}
 </section>
 
+<script id="jekyll-post-dates" type="application/json">
+  [
+    {% for post in site.posts %}
+      "{{ post.date | date: "%Y-%m-%d" }}"{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ]
+</script>
+
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const buttons = document.querySelectorAll(".filter-btn");
@@ -157,5 +194,170 @@ title: Home
 
     window.addEventListener("hashchange", checkHash);
     checkHash();
+
+    // --- Activity Graph Logic ---
+    const postDatesData = document.getElementById('jekyll-post-dates');
+    if (postDatesData) {
+      const postDates = JSON.parse(postDatesData.textContent);
+      const dateCounts = {};
+      postDates.forEach(dateStr => {
+        dateCounts[dateStr] = (dateCounts[dateStr] || 0) + 1;
+      });
+
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      // Extract unique years from the dates
+      const years = [...new Set(postDates.map(d => parseInt(d.split('-')[0])))].sort((a, b) => b - a);
+      if (years.length === 0) {
+        years.push(today.getFullYear());
+      }
+
+      const calendarBoard = document.getElementById('calendar-board');
+      const yearSelector = document.getElementById('year-selector');
+
+      // Create tooltip element in body if it doesn't exist
+      let tooltip = document.getElementById('contrib-tooltip');
+      if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.id = 'contrib-tooltip';
+        tooltip.className = 'contrib-tooltip';
+        document.body.appendChild(tooltip);
+      }
+
+      function renderYear(year) {
+        // Clear previous month labels and cells (leave weekday labels)
+        const oldElements = calendarBoard.querySelectorAll('.month-label, .calendar-cell');
+        oldElements.forEach(el => el.remove());
+
+        const startDate = new Date(year, 0, 1);
+        startDate.setDate(1 - startDate.getDay()); // Adjust to Sunday
+
+        const endDate = new Date(year, 11, 31);
+        endDate.setDate(31 + (6 - endDate.getDay())); // Adjust to Saturday
+
+        const numDays = Math.round((endDate - startDate) / (24 * 60 * 60 * 1000)) + 1;
+        const numWeeks = numDays / 7;
+
+        calendarBoard.style.gridTemplateColumns = `auto repeat(${numWeeks}, 9px)`;
+
+        // Generate list of dates
+        const cells = [];
+        let curr = new Date(startDate);
+        while (curr <= endDate) {
+          cells.push(new Date(curr));
+          curr.setDate(curr.getDate() + 1);
+        }
+
+        // Add month labels
+        let lastMonth = '';
+        for (let w = 0; w < numWeeks; w++) {
+          const SundayDate = cells[w * 7];
+          const monthName = SundayDate.toLocaleString('en-US', { month: 'short' });
+          if (monthName !== lastMonth) {
+            lastMonth = monthName;
+            const monthSpan = document.createElement('span');
+            monthSpan.className = 'month-label';
+            monthSpan.style.gridColumn = w + 2;
+            monthSpan.style.gridRow = 1;
+            monthSpan.textContent = monthName;
+            calendarBoard.appendChild(monthSpan);
+          }
+        }
+
+        // Calculate total contributions in this year
+        let totalInYear = 0;
+        for (const [dateStr, count] of Object.entries(dateCounts)) {
+          const [y, m, d] = dateStr.split('-').map(Number);
+          if (y === year) {
+            totalInYear += count;
+          }
+        }
+
+        const summaryEl = document.getElementById('activity-summary');
+        if (summaryEl) {
+          summaryEl.innerHTML = `<strong>${totalInYear} articles</strong> in ${year}`;
+        }
+
+        // Add cells
+        for (let w = 0; w < numWeeks; w++) {
+          for (let d = 0; d < 7; d++) {
+            const idx = w * 7 + d;
+            const date = cells[idx];
+            const yearVal = date.getFullYear();
+            const monthVal = String(date.getMonth() + 1).padStart(2, '0');
+            const dayVal = String(date.getDate()).padStart(2, '0');
+            const dateStr = `${yearVal}-${monthVal}-${dayVal}`;
+
+            const count = dateCounts[dateStr] || 0;
+            const isFuture = date > today;
+
+            const cell = document.createElement('div');
+            cell.style.gridColumn = w + 2;
+            cell.style.gridRow = d + 2;
+
+            if (isFuture) {
+              cell.className = 'calendar-cell is-future';
+            } else {
+              cell.className = `calendar-cell level-${Math.min(count, 4)}`;
+              cell.setAttribute('data-date', dateStr);
+              cell.setAttribute('data-count', count);
+
+              // Tooltip handlers
+              cell.addEventListener('mouseenter', (e) => {
+                const dateObj = new Date(yearVal, date.getMonth(), date.getDate());
+                const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                
+                let text = '';
+                if (count === 0) {
+                  text = `No articles on ${formattedDate}`;
+                } else if (count === 1) {
+                  text = `1 article on ${formattedDate}`;
+                } else {
+                  text = `${count} articles on ${formattedDate}`;
+                }
+
+                tooltip.textContent = text;
+                tooltip.style.visibility = 'visible';
+                tooltip.style.opacity = '1';
+
+                const rect = cell.getBoundingClientRect();
+                const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+                tooltip.style.left = `${rect.left + rect.width / 2 + scrollLeft}px`;
+                tooltip.style.top = `${rect.top + scrollTop}px`;
+              });
+
+              cell.addEventListener('mouseleave', () => {
+                tooltip.style.visibility = 'hidden';
+                tooltip.style.opacity = '0';
+              });
+            }
+
+            calendarBoard.appendChild(cell);
+          }
+        }
+      }
+
+      // Initialize year selector buttons
+      if (yearSelector && calendarBoard) {
+        yearSelector.innerHTML = '';
+        years.forEach((yr, idx) => {
+          const btn = document.createElement('button');
+          btn.className = `year-btn${idx === 0 ? ' active' : ''}`;
+          btn.textContent = yr;
+          btn.addEventListener('click', () => {
+            yearSelector.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderYear(yr);
+          });
+          yearSelector.appendChild(btn);
+        });
+
+        // Render first year by default
+        renderYear(years[0]);
+      }
+    }
   });
 </script>
