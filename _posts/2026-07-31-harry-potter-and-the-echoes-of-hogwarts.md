@@ -7,8 +7,8 @@ categories:
 - Audiobooks
 - Sound
 date: '2026-07-31'
-description: When you put on a pair of headphones and press play on a story, it feels
-  like a simple transmission. Sound waves travel through the air, hit your...
+description: Pressing play on a story through a pair of headphones seems simple
+  enough. Sound waves travel through the air, strike the eardrums, and the brain effortlessly translates them into words and narrative.
 image: /_assets/images/cover-09.png
 layout: post
 title: Harry Potter and the Echoes of Hogwarts
