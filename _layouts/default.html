@@ -972,6 +972,43 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.15);
       font-family: var(--font-poppins);
     }
+
+    /* Back to Top Floating Button */
+    .back-to-top-btn {
+      position: fixed !important;
+      bottom: 2.5rem !important;
+      right: 2.5rem !important;
+      width: 46px !important;
+      height: 46px !important;
+      border-radius: 50% !important;
+      background-color: var(--card-bg) !important;
+      color: var(--text-main) !important;
+      border: 1px solid var(--border-color) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: pointer !important;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(12px);
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color var(--transition-speed) ease, border-color var(--transition-speed) ease, color var(--transition-speed) ease, box-shadow 0.2s ease !important;
+      z-index: 9999 !important;
+    }
+
+    .back-to-top-btn.visible {
+      opacity: 1 !important;
+      visibility: visible !important;
+      transform: translateY(0) !important;
+    }
+
+    .back-to-top-btn:hover {
+      background-color: var(--text-main) !important;
+      color: var(--bg-color) !important;
+      border-color: var(--text-main) !important;
+      transform: translateY(-3px) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+    }
   </style>
   <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
@@ -1047,18 +1084,43 @@
     </div>
   </footer>
 
-  <!-- Theme Toggle Script -->
+  <!-- Back to Top Floating Button -->
+  <button id="back-to-top" class="back-to-top-btn" aria-label="Back to top" title="Back to top">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <!-- Theme Toggle & Back to Top Script -->
   <script>
     (function() {
       var toggleBtn = document.getElementById('theme-toggle');
-      if (!toggleBtn) return;
-      
-      toggleBtn.addEventListener('click', function() {
-        var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-        var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-      });
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+          var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', newTheme);
+          localStorage.setItem('theme', newTheme);
+        });
+      }
+
+      var backToTopBtn = document.getElementById('back-to-top');
+      if (backToTopBtn) {
+        window.addEventListener('scroll', function() {
+          if (window.scrollY > 300) {
+            backToTopBtn.classList.add('visible');
+          } else {
+            backToTopBtn.classList.remove('visible');
+          }
+        });
+
+        backToTopBtn.addEventListener('click', function() {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        });
+      }
     })();
   </script>
 
