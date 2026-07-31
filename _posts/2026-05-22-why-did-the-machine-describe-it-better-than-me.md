@@ -2,7 +2,7 @@
 categories:
 - Artificial Intelligence
 - Captioning
-- Human Cognition
+- Human Intelligence
 date: '2026-05-22'
 image: /_assets/images/cover_02.png
 layout: post

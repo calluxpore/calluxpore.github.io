@@ -1,7 +1,7 @@
 ---
 categories:
 - Human Memory
-- Sensory Perception
+- Perception
 - Cognitive Science
 date: 2026-07-04 12:00:00 +0530
 description: When you try to pull a moment back from the past, what exactly arrives

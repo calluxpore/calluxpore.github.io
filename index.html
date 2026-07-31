@@ -63,9 +63,12 @@ title: Home
     <button class="filter-btn active" data-filter="all">All</button>
     {% for category in all_categories %}
     {% if category != "" %}
-    <button class="filter-btn" data-filter="{{ category | downcase | replace: ' ', '-' }}">{{ category | escape }}</button>
+    <button class="filter-btn {% if forloop.index > 6 %}tag-extra tag-hidden{% endif %}" data-filter="{{ category | downcase | replace: ' ', '-' }}">{{ category | escape }}</button>
     {% endif %}
     {% endfor %}
+    {% if all_categories.size > 6 %}
+    <button class="filter-btn-toggle" id="toggle-tags-btn" data-more="+ {{ all_categories.size | minus: 6 }} more" data-less="Show less">+ {{ all_categories.size | minus: 6 }} more</button>
+    {% endif %}
   </div>
   <hr class="filter-separator">
   {% endif %}
@@ -133,9 +136,12 @@ title: Home
         <!-- Post Categories -->
         {% if post.categories.size > 0 %}
         <div class="post-categories-container">
-          {% for category in post.categories %}
+          {% for category in post.categories limit:3 %}
           <span class="post-category-tag">{{ category | escape }}</span>
           {% endfor %}
+          {% if post.categories.size > 3 %}
+          <span class="post-category-tag" title="{{ post.categories | offset:3 | join: ', ' }}" style="opacity: 0.7;">+{{ post.categories.size | minus: 3 }}</span>
+          {% endif %}
         </div>
         {% endif %}
 
@@ -206,12 +212,34 @@ title: Home
       });
     });
 
+    const toggleBtn = document.getElementById("toggle-tags-btn");
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", function () {
+        const extraTags = document.querySelectorAll(".tag-extra");
+        const isExpanded = toggleBtn.getAttribute("data-expanded") === "true";
+        if (isExpanded) {
+          extraTags.forEach(tag => tag.classList.add("tag-hidden"));
+          toggleBtn.textContent = toggleBtn.getAttribute("data-more");
+          toggleBtn.setAttribute("data-expanded", "false");
+        } else {
+          extraTags.forEach(tag => tag.classList.remove("tag-hidden"));
+          toggleBtn.textContent = toggleBtn.getAttribute("data-less");
+          toggleBtn.setAttribute("data-expanded", "true");
+        }
+      });
+    }
+
     // Handle initial page load or back/forward navigation using URL hash
     function checkHash() {
       if (window.location.hash) {
         const initialFilter = window.location.hash.substring(1);
         const matchedBtn = document.querySelector(`.filter-btn[data-filter="${initialFilter}"]`);
         if (matchedBtn) {
+          if (matchedBtn.classList.contains("tag-extra") && toggleBtn) {
+            document.querySelectorAll(".tag-extra").forEach(tag => tag.classList.remove("tag-hidden"));
+            toggleBtn.textContent = toggleBtn.getAttribute("data-less");
+            toggleBtn.setAttribute("data-expanded", "true");
+          }
           filterCategory(initialFilter);
         } else {
           filterCategory("all");

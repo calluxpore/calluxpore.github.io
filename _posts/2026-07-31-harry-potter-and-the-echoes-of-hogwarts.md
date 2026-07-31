@@ -1,11 +1,11 @@
 ---
 categories:
-- books/harry-potter
-- perception
-- cognitive-science
-- artificial-intelligence
-- audiobooks
-- sound
+- Books
+- Perception
+- Cognitive Science
+- Artificial Intelligence
+- Audiobooks
+- Sound
 date: '2026-07-31'
 description: When you put on a pair of headphones and press play on a story, it feels
   like a simple transmission. Sound waves travel through the air, hit your...

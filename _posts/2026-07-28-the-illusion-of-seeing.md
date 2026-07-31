@@ -1,6 +1,6 @@
 ---
 categories:
-- Vision
+- Computer Vision
 - Perception
 - Cognitive Science
 - Artificial Intelligence
