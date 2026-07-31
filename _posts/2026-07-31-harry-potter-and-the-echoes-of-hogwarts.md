@@ -14,7 +14,7 @@ layout: post
 title: Harry Potter and the Echoes of Hogwarts
 ---
 
-When you put on a pair of headphones and press play on a story, it feels like a simple transmission. Sound waves travel through the air, hit your eardrums, and your brain translates them into words. You listen, and you follow along.
+Pressing play on a story through a pair of headphones seems simple enough. Sound waves travel through the air, strike the eardrums, and the brain effortlessly translates them into words and narrative.
 
 In reality, true immersive listening is split into two very different phenomena: acoustic reception and cognitive reconstruction. Acoustic reception is purely mechanical. It is your ear capturing pressure changes in the air and converting them into electrical signals for your brain. It is raw, unformatted data. Perception, however, is what your brain builds out of those signals.
 
