@@ -9,7 +9,7 @@ description: Typing a sentence into a text box feels like looking through a clea
   window. Words go in, and intelligence comes out. In reality, that text box is just...
 image: /_assets/images/cover-010.png
 layout: post
-title: The Invisible Architecture of Machine Thought
+title: The Evolution of Machine Intent
 ---
 
 Typing a sentence into a text box feels like looking through a clear window. Words go in, and intelligence comes out. In reality, that text box is just the thinnest surface of a massive, invisible structure.
