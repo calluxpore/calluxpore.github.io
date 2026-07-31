@@ -24,6 +24,7 @@ description: >-
   Designer, researcher, and creative technologist based in Toronto, Canada. Deeply focused on designing for and with Artificial Intelligence.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://calluxpore.github.io" # the base hostname & protocol for your site
+permalink: /:year/:month/:day/:title.html
 github_username:  calluxpore
 
 # Feed & Site Icon Settings
