@@ -375,4 +375,31 @@ layout: default
     {{ content }}
   </div>
 
+  <!-- Post Previous / Next Navigation -->
+  <nav class="post-navigation-grid" aria-label="Post navigation">
+    <div class="post-nav-slot post-nav-prev">
+      {% if page.previous %}
+        <a href="{{ page.previous.url | relative_url }}" class="post-nav-card" title="{{ page.previous.title | escape }}">
+          <span class="post-nav-icon">←</span>
+          <div class="post-nav-text">
+            <span class="post-nav-label">Previous Post</span>
+            <span class="post-nav-title">{{ page.previous.title | escape }}</span>
+          </div>
+        </a>
+      {% endif %}
+    </div>
+
+    <div class="post-nav-slot post-nav-next">
+      {% if page.next %}
+        <a href="{{ page.next.url | relative_url }}" class="post-nav-card" title="{{ page.next.title | escape }}">
+          <div class="post-nav-text">
+            <span class="post-nav-label">Next Post</span>
+            <span class="post-nav-title">{{ page.next.title | escape }}</span>
+          </div>
+          <span class="post-nav-icon">→</span>
+        </a>
+      {% endif %}
+    </div>
+  </nav>
+
 </article>
