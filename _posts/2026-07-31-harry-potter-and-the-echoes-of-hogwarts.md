@@ -32,7 +32,7 @@ When you hear a sound, such as the sharp, hollow tink of a wand tapping a glass 
 
 Cognitive science suggests it is a dynamic interaction between both. Through a mechanism known as predictive processing, your auditory cortex instantly queries your accumulated sensory library: What does old glass sound like? What does a stone hall echo like when it is cold? It matches the incoming acoustic signature against past visual and tactile experiences. You do not just hear the wand hit the glass; your brain summons the memory of cold smooth glass, the smell of dust in an old shop, and the dim ambient light of an Ollivanders storeroom.
 
-Furthermore, sound is fundamentally sparse data compared to video. A film frame provides millions of pre-determined pixels, telling your visual cortex exactly what to see and leaving little room for imagination. Sound does the opposite. It gives you raw emotional cues and spatial hints, forcing your brain’s perceptual engine to fill in the missing visual frames. Your mind becomes an active co-creator.
+Sound is fundamentally sparse data compared to video. A film frame provides millions of pre-determined pixels, telling your visual cortex exactly what to see and leaving little room for imagination. Sound does the opposite. It gives you raw emotional cues and spatial hints, forcing your brain’s perceptual engine to fill in the missing visual frames. Your mind becomes an active co-creator.
 
 ![Ahpcs art9](/_assets/images/ahpcs-art9.png)
 
