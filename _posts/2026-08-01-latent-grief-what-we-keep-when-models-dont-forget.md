@@ -9,7 +9,7 @@ description: I was recently testing a highly publicized audio model, one markete
   for its emotional nuance and its ability to simulate hesitations, laughter, and...
 image: /_assets/images/cover-012.png
 layout: post
-title: Latent Grief - What We Keep When Models Don’t Forget
+title: Latent Grief
 ---
 
 I was recently testing a highly publicized audio model, one marketed for its emotional nuance and its ability to simulate hesitations, laughter, and feeling.
