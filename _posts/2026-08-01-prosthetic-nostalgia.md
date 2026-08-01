@@ -4,7 +4,7 @@ categories:
 - Human Memory
 - Artificial Intelligence
 - Human Computer Interaction
-date: '2026-08-01'
+date: 2026-08-01 01:00:00 +0530
 description: Memory is not a video recording. It is a live performance. Every time
   we pull a moment back from the past, the brain quietly rewrites the script. It drops...
 image: /_assets/images/cover-011.png

@@ -6,7 +6,7 @@ categories:
 - Artificial Intelligence
 - Audiobooks
 - Sound
-date: '2026-07-31'
+date: 2026-07-31 10:00:00 +0530
 description: Pressing play on a story through a pair of headphones seems simple
   enough. Sound waves travel through the air, strike the eardrums, and the brain effortlessly translates them into words and narrative.
 image: /_assets/images/cover-09.png

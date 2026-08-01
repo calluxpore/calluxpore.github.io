@@ -3,7 +3,7 @@ categories:
 - Artificial Intelligence
 - Captioning
 - Human Intelligence
-date: '2026-05-22'
+date: 2026-05-22 11:00:00 +0530
 image: /_assets/images/cover_02.png
 layout: post
 title: Why Did the Machine Describe It Better Than Me?

@@ -4,7 +4,7 @@ categories:
 - Cognitive Science
 - Artificial Intelligence
 - Human Computer Interaction
-date: '2026-07-31'
+date: 2026-07-31 11:00:00 +0530
 description: Typing a sentence into a text box feels like looking through a clear
   window. Words go in, and intelligence comes out. In reality, that text box is just...
 image: /_assets/images/cover-010.png

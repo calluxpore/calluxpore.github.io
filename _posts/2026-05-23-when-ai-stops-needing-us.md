@@ -3,7 +3,7 @@ categories:
 - Artificial Intelligence
 - Future of Work
 - AI Economics
-date: '2026-05-23'
+date: 2026-05-23 11:00:00 +0530
 description: In early 2025, I was sitting inside the ACE Lab at OCAD University speaking
   with Dr.Alexis Morris. The room had that familiar research lab atmosphere....
 image: /_assets/images/cover_04.png

@@ -3,7 +3,7 @@ categories:
 - Artificial Intelligence
 - Computer Vision
 - Accessibility
-date: '2026-05-22'
+date: 2026-05-22 10:00:00 +0530
 image: /_assets/images/cover_01.png
 layout: post
 title: The Faces We Forget
