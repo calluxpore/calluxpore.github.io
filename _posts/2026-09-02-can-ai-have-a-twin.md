@@ -7,7 +7,7 @@ categories:
 date: '2026-09-02'
 description: When I was in middle school, there were two sisters in my class who looked
   so remarkably identical that even our teachers gave up trying to tell them...
-image: /_assets/images/cpver14.jpg
+image: /_assets/images/cover-014.png
 layout: post
 title: Can AI Have a Twin?
 ---
