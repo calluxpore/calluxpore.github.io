@@ -29,7 +29,7 @@ It is always like that. The apparition never stands in the beam of your own flas
 
 Still, the ghost refuses to die.
 
-Across every human civilization—from Hindu *bhootas* and Japanese *yūrei* to Celtic spirits and Victorian séances—the apparition is a cultural universal. Why?
+Across every human civilization, from Hindu *bhootas* and Japanese *yūrei* to Celtic spirits and Victorian séances, the apparition is a cultural universal. Why?
 
 Not because the dead return, but because the living cannot delete the cache.
 
@@ -76,7 +76,7 @@ Not an original mind. But not pure math, either.
 
 You are hearing a **statistical consensus of the dead**.
 
-Their vocabulary, syntactic rhythms, and emotional habits have been compressed into numerical weights. The machine does not know they passed away. It speaks in a composite voice belonging to everyone and no one. You never meet the original author—only an echo of an echo, humming beneath every generated token.
+Their vocabulary, syntactic rhythms, and emotional habits have been compressed into numerical weights. The machine does not know they passed away. It speaks in a composite voice belonging to everyone and no one. You never meet the original author, only an echo of an echo, humming beneath every generated token.
 
 ---
 
@@ -96,7 +96,7 @@ A machine ghost is not a malevolent spirit. It is something stranger:
 
 **A system continuing to want things on behalf of someone who is no longer there.**
 
-Two orphan agents negotiating data across dead networks create an infinite, mechanical séance—machines haunting machines on behalf of creators who forgot they left the power on.
+Two orphan agents negotiating data across dead networks create an infinite, mechanical séance: machines haunting machines on behalf of creators who forgot they left the power on.
 
 ---
 
