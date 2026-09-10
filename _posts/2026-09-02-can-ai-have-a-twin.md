@@ -5,9 +5,10 @@ categories:
 - Philosophy of Mind
 - Identity
 date: '2026-09-02'
-description: When I was in middle school, there were two sisters in my class who looked
-  so remarkably identical that even our teachers gave up trying to tell them...
+description: When I was in middle school, there were two sisters in my class who looked so remarkably identical that even our teachers gave up trying to tell them apart.
 image: /_assets/images/cover-014.png
+image_width: 848
+image_height: 1264
 layout: post
 title: Can AI Have a Twin?
 ---

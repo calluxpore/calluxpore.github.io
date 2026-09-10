@@ -4,9 +4,10 @@ categories:
 - Perception
 - Cognitive Science
 date: 2026-07-04 12:00:00 +0530
-description: When you try to pull a moment back from the past, what exactly arrives
-  in your mind? Is it a picture? A sound? Or just the heavy, invisible shape of a...
+description: When you try to pull a moment back from the past, what exactly arrives in your mind? Is it a picture? A sound?
 image: /_assets/images/cover_06.png
+image_width: 1024
+image_height: 1536
 layout: post
 title: The Invisible Architecture of Memory
 ---

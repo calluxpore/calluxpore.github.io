@@ -5,9 +5,10 @@ categories:
 - Cognitive Science
 - Artificial Intelligence
 date: '2026-07-28'
-description: When you look at an apple on a table, it feels like you are looking through
-  a clear window. Light hits your eyes, and you see the apple. In reality,...
+description: When you look at an apple on a table, it feels like you are looking through a clear window. Light hits your eyes, and you see the apple.
 image: /_assets/images/cover-08.png
+image_width: 1024
+image_height: 1536
 layout: post
 title: The Illusion of Seeing
 ---

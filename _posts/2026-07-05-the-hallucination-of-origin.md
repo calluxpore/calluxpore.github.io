@@ -5,10 +5,11 @@ categories:
 - Cognitive Science
 - Neural Architecture
 date: '2026-07-05'
-description: Have you ever experienced a vivid sense of déjà vu, or remembered a childhood
-  event so clearly you could practically taste the birthday cake, only to...
+description: Have you ever experienced a vivid sense of déjà vu, or remembered a childhood event so clearly you could practically taste the birthday cake, only to…
 layout: post
 image: /_assets/images/cover_07.png
+image_width: 1024
+image_height: 1536
 title: The Hallucination of Origin
 ---
 

@@ -5,8 +5,11 @@ categories:
 - Accessibility
 date: 2026-05-22 10:00:00 +0530
 image: /_assets/images/cover_01.png
+image_width: 682
+image_height: 1024
 layout: post
 title: The Faces We Forget
+description: I kept thinking about how fragile recognition really is. Not digital recognition. Human recognition.
 ---
 
 I kept thinking about how fragile recognition really is.

@@ -6,9 +6,10 @@ categories:
 - Folklore
 - Identity
 date: '2026-09-04'
-description: I have never seen a ghost. Not once. I have spent quiet nights in creaky
-  ancestral houses in India where every wooden beam groaned under the heat. I have...
+description: I have never seen a ghost. Not once. I have spent quiet nights in creaky ancestral houses in India where every wooden beam groaned under the heat.
 image: /_assets/images/cover-015.png
+image_width: 848
+image_height: 1264
 layout: post
 title: Ghost in the Machine
 ---

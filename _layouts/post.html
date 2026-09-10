@@ -1,6 +1,8 @@
 ---
 layout: default
 ---
+<div class="reading-progress" id="reading-progress" aria-hidden="true"></div>
+
 <article class="post-article" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
@@ -9,10 +11,11 @@ layout: default
       <time datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
         {{ page.date | date: "%B %d, %Y" }}
       </time>
-      {% if page.author %}
+      {% assign post_author = page.author | default: site.author %}
+      {% if post_author %}
         <span>•</span>
         <span itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <span itemprop="name">{{ page.author | escape }}</span>
+          <span class="post-byline-author" itemprop="name">{{ post_author | escape }}</span>
         </span>
       {% endif %}
       <span>•</span>
@@ -29,21 +32,29 @@ layout: default
     {% if page.categories.size > 0 %}
     <div class="post-categories-container" style="justify-content: center; margin-top: 1rem; margin-bottom: 0;">
       {% for category in page.categories %}
-      <span class="post-category-tag">{{ category | escape }}</span>
+      <a class="post-category-tag"
+         href="{{ '/' | relative_url }}#{{ category | downcase | replace: ' ', '-' }}"
+         title="See all posts in {{ category | escape }}">{{ category | escape }}</a>
       {% endfor %}
     </div>
     {% endif %}
   </header>
 
+  {% if page.image %}
+  <figure class="post-hero">
+    <img src="{{ page.image | relative_url }}"
+         alt=""
+         {% if page.image_width and page.image_height %}width="{{ page.image_width }}" height="{{ page.image_height }}"{% endif %}
+         fetchpriority="high" decoding="async"
+         itemprop="image">
+  </figure>
+  {% endif %}
+
   {% assign post_name = page.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' %}
   {% assign target_audio_name = post_name | append: '.mp3' %}
+  {% assign audio_file = site.static_files | where: "name", target_audio_name | first %}
   {% assign audio_url = nil %}
-  {% for static_file in site.static_files %}
-    {% if static_file.name == target_audio_name %}
-      {% assign audio_url = static_file.path | relative_url %}
-      {% break %}
-    {% endif %}
-  {% endfor %}
+  {% if audio_file %}{% assign audio_url = audio_file.path | relative_url %}{% endif %}
 
   {% if audio_url %}
     <div class="audio-player-container">
@@ -390,8 +401,46 @@ layout: default
   {% endif %}
 
   <div class="post-content" itemprop="articleBody">
-    {{ content }}
+    {{ content | replace: '<img src=', '<img loading="lazy" decoding="async" src=' }}
   </div>
+
+  <!-- Related posts: scored by how many categories they share with this one -->
+  {% assign related_keys = '' %}
+  {% for candidate in site.posts %}
+    {% if candidate.url != page.url %}
+      {% assign shared = 0 %}
+      {% for category in page.categories %}
+        {% if candidate.categories contains category %}
+          {% assign shared = shared | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+      {% if shared > 0 %}
+        {% assign score = shared | prepend: '0' | slice: -2, 2 %}
+        {% assign related_keys = related_keys | append: score | append: '|' | append: candidate.url | append: ',' %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+  {% assign related = related_keys | split: ',' | sort | reverse %}
+
+  {% if related.size > 0 %}
+  <section class="related-posts" aria-labelledby="related-heading">
+    <h2 class="related-posts-title" id="related-heading">Related reading</h2>
+    <ul class="related-grid">
+      {% for entry in related limit: 3 %}
+        {% assign related_url = entry | split: '|' | last %}
+        {% assign related_post = site.posts | where: 'url', related_url | first %}
+        {% if related_post %}
+        <li>
+          <a class="related-card" href="{{ related_post.url | relative_url }}">
+            <span class="related-card-meta">{{ related_post.date | date: "%b %d, %Y" }}</span>
+            <span class="related-card-title">{{ related_post.title | escape }}</span>
+          </a>
+        </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
 
   <!-- Post Previous / Next Navigation -->
   <nav class="post-navigation-grid" aria-label="Post navigation">

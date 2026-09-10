@@ -5,9 +5,10 @@ categories:
 - Artificial Intelligence
 - Human Computer Interaction
 date: 2026-07-31 11:00:00 +0530
-description: Typing a sentence into a text box feels like looking through a clear
-  window. Words go in, and intelligence comes out. In reality, that text box is just...
+description: Typing a sentence into a text box feels like looking through a clear window. Words go in, and intelligence comes out.
 image: /_assets/images/cover-010.png
+image_width: 1024
+image_height: 1536
 layout: post
 title: The Evolution of Machine Intent
 ---

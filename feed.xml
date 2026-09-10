@@ -19,7 +19,7 @@ layout: null
     <title>{{ site.title | xml_escape }}</title>
     <link>{{ '/' | absolute_url }}</link>
   </image>
-  {% for post in site.posts limit:30 %}
+  {% for post in site.posts limit:12 %}
     <entry>
       <title type="html">{{ post.title | xml_escape }}</title>
       <link href="{{ post.url | absolute_url }}" rel="alternate" type="text/html" title="{{ post.title | xml_escape }}"/>
@@ -33,8 +33,9 @@ layout: null
         {% endif %}
         {{ full_content | xml_escape }}
       </content>
-      {% if post.author %}
-        <author><name>{{ post.author | xml_escape }}</name></author>
+      {% assign feed_author = post.author | default: site.author %}
+      {% if feed_author %}
+        <author><name>{{ feed_author | xml_escape }}</name></author>
       {% endif %}
       {% for category in post.categories %}
         <category term="{{ category | xml_escape }}"/>

@@ -5,9 +5,10 @@ categories:
 - Artificial Intelligence
 - Human Computer Interaction
 date: 2026-08-01 01:00:00 +0530
-description: Memory is not a video recording. It is a live performance. Every time
-  we pull a moment back from the past, the brain quietly rewrites the script. It drops...
+description: Memory is not a video recording. It is a live performance. Every time we pull a moment back from the past, the brain quietly rewrites the script.
 image: /_assets/images/cover-011.png
+image_width: 1024
+image_height: 1536
 layout: post
 title: Prosthetic Nostalgia
 ---

@@ -26,6 +26,19 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://calluxpore.github.io" # the base hostname & protocol for your site
 permalink: /:year/:month/:day/:title.html
 github_username:  calluxpore
+author: Samarth Reddy
+
+# Pin the build timezone. Without this, a post dated without a time is interpreted
+# in the *build server's* zone, which can shift its permalink by a day.
+timezone: America/Toronto
+
+# Applied by jekyll-seo-tag and available to the layouts.
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      author: Samarth Reddy
 
 # Feed & Site Icon Settings
 icon: "/_assets/images/icon.png"

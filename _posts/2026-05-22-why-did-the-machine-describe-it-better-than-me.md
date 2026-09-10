@@ -5,8 +5,11 @@ categories:
 - Human Intelligence
 date: 2026-05-22 11:00:00 +0530
 image: /_assets/images/cover_02.png
+image_width: 682
+image_height: 1024
 layout: post
 title: Why Did the Machine Describe It Better Than Me?
+description: It’s been a while since I built this LoRA evaluation project, but I still find myself thinking about one strange observation from it.
 ---
 
 It’s been a while since I built this LoRA evaluation project, but I still find myself thinking about one strange observation from it.

@@ -38,7 +38,7 @@ title: Home
       <div class="year-selector" id="year-selector"></div>
     </div>
     <div class="activity-grid-scroll-container">
-      <div class="calendar-board" id="calendar-board">
+      <div class="calendar-board" id="calendar-board" role="img" aria-label="Publishing activity calendar">
         <span class="weekday-label" style="grid-column: 1; grid-row: 3;">Mon</span>
         <span class="weekday-label" style="grid-column: 1; grid-row: 5;">Wed</span>
         <span class="weekday-label" style="grid-column: 1; grid-row: 7;">Fri</span>
@@ -60,14 +60,14 @@ title: Home
   <!-- Category Filter Navigation -->
   {% if all_categories.size > 0 %}
   <div class="category-filter-nav">
-    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn active" type="button" aria-pressed="true" data-filter="all">All</button>
     {% for category in all_categories %}
     {% if category != "" %}
-    <button class="filter-btn {% if forloop.index > 6 %}tag-extra tag-hidden{% endif %}" data-filter="{{ category | downcase | replace: ' ', '-' }}">{{ category | escape }}</button>
+    <button class="filter-btn {% if forloop.index > 6 %}tag-extra tag-hidden{% endif %}" type="button" aria-pressed="false" data-filter="{{ category | downcase | replace: ' ', '-' }}">{{ category | escape }}</button>
     {% endif %}
     {% endfor %}
     {% if all_categories.size > 6 %}
-    <button class="filter-btn-toggle" id="toggle-tags-btn" data-more="+ {{ all_categories.size | minus: 6 }} more" data-less="Show less">+ {{ all_categories.size | minus: 6 }} more</button>
+    <button class="filter-btn-toggle" id="toggle-tags-btn" type="button" aria-expanded="false" data-more="+ {{ all_categories.size | minus: 6 }} more" data-less="Show less">+ {{ all_categories.size | minus: 6 }} more</button>
     {% endif %}
   </div>
   <hr class="filter-separator">
@@ -79,20 +79,23 @@ title: Home
     {% for post in site.posts %}
     {% assign post_name = post.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' %}
     {% assign target_audio_name = post_name | append: '.mp3' %}
+    {% assign audio_file = site.static_files | where: "name", target_audio_name | first %}
     {% assign has_audio = false %}
-    {% for static_file in site.static_files %}
-      {% if static_file.name == target_audio_name %}
-        {% assign has_audio = true %}
-        {% break %}
-      {% endif %}
-    {% endfor %}
+    {% if audio_file %}{% assign has_audio = true %}{% endif %}
     <li class="post-item"
       data-categories="all,{% for category in post.categories %}{{ category | downcase | replace: ' ', '-' }}{% if forloop.last == false %},{% endif %}{% endfor %}">
       
       <!-- Post Image -->
-      <a href="{{ post.url | relative_url }}" class="post-item-image-container" aria-label="{{ post.title | escape }}">
+      <a href="{{ post.url | relative_url }}" class="post-item-image-container" tabindex="-1" aria-hidden="true">
         {% if post.image %}
-          <img src="{{ post.image | relative_url }}" alt="{{ post.title }}" class="post-item-image">
+          {% assign thumb_base = post.image | split: '/' | last | split: '.' | first %}
+          {% assign thumb_path = '/_assets/images/thumbs/' | append: thumb_base | append: '.webp' %}
+          {% assign thumb_file = site.static_files | where: "path", thumb_path | first %}
+          <img src="{% if thumb_file %}{{ thumb_path | relative_url }}{% else %}{{ post.image | relative_url }}{% endif %}"
+               alt=""
+               class="post-item-image"
+               width="320" height="280"
+               loading="lazy" decoding="async">
         {% else %}
           <div class="post-item-image-placeholder">
             <span>✱</span>
@@ -130,7 +133,7 @@ title: Home
 
         <!-- Post Excerpt -->
         <p class="post-excerpt">
-          {{ post.description | default: post.excerpt | strip_html | truncatewords: 30 }}
+          {{ post.description | default: post.excerpt | strip_html | strip | truncatewords: 45, "…" }}
         </p>
 
         <!-- Post Categories -->
@@ -182,11 +185,9 @@ title: Home
 
     function filterCategory(filterVal) {
       buttons.forEach(btn => {
-        if (btn.getAttribute("data-filter") === filterVal) {
-          btn.classList.add("active");
-        } else {
-          btn.classList.remove("active");
-        }
+        const isActive = btn.getAttribute("data-filter") === filterVal;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-pressed", isActive ? "true" : "false");
       });
 
       posts.forEach(post => {
@@ -221,10 +222,12 @@ title: Home
           extraTags.forEach(tag => tag.classList.add("tag-hidden"));
           toggleBtn.textContent = toggleBtn.getAttribute("data-more");
           toggleBtn.setAttribute("data-expanded", "false");
+          toggleBtn.setAttribute("aria-expanded", "false");
         } else {
           extraTags.forEach(tag => tag.classList.remove("tag-hidden"));
           toggleBtn.textContent = toggleBtn.getAttribute("data-less");
           toggleBtn.setAttribute("data-expanded", "true");
+          toggleBtn.setAttribute("aria-expanded", "true");
         }
       });
     }
@@ -239,6 +242,7 @@ title: Home
             document.querySelectorAll(".tag-extra").forEach(tag => tag.classList.remove("tag-hidden"));
             toggleBtn.textContent = toggleBtn.getAttribute("data-less");
             toggleBtn.setAttribute("data-expanded", "true");
+            toggleBtn.setAttribute("aria-expanded", "true");
           }
           filterCategory(initialFilter);
         } else {
@@ -306,20 +310,30 @@ title: Home
           curr.setDate(curr.getDate() + 1);
         }
 
-        // Add month labels
-        let lastMonth = '';
+        // Add month labels.
+        // The board starts on the Sunday before Jan 1 and ends on the Saturday after
+        // Dec 31, so the first and last columns can belong to the neighbouring year.
+        // Label a column only when the week contains days of the rendered year and
+        // introduces a new month, otherwise "Dec" and "Jan" collide in column 2.
+        let lastMonth = -1;
         for (let w = 0; w < numWeeks; w++) {
-          const SundayDate = cells[w * 7];
-          const monthName = SundayDate.toLocaleString('en-US', { month: 'short' });
-          if (monthName !== lastMonth) {
-            lastMonth = monthName;
-            const monthSpan = document.createElement('span');
-            monthSpan.className = 'month-label';
-            monthSpan.style.gridColumn = w + 2;
-            monthSpan.style.gridRow = 1;
-            monthSpan.textContent = monthName;
-            calendarBoard.appendChild(monthSpan);
-          }
+          // The month this column represents is the one covering most of its in-year days.
+          const weekDays = cells.slice(w * 7, w * 7 + 7).filter(d => d.getFullYear() === year);
+          if (weekDays.length === 0) continue;
+
+          const monthIndex = weekDays[0].getMonth();
+          if (monthIndex === lastMonth) continue;
+
+          // Skip a label that would sit in the final column with no room to read.
+          if (w > numWeeks - 2) continue;
+
+          lastMonth = monthIndex;
+          const monthSpan = document.createElement('span');
+          monthSpan.className = 'month-label';
+          monthSpan.style.gridColumn = w + 2;
+          monthSpan.style.gridRow = 1;
+          monthSpan.textContent = weekDays[0].toLocaleString('en-US', { month: 'short' });
+          calendarBoard.appendChild(monthSpan);
         }
 
         // Calculate total contributions in this year

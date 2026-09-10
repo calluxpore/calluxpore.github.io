@@ -4,9 +4,10 @@ categories:
 - Human Memory
 - Artificial Intelligence
 date: '2026-08-04'
-description: When I was a young boy, visiting my father’s elder brother in another
-  city was a rare delight. His house was always filled with laughter, generous meals,...
+description: When I was a young boy, visiting my father’s elder brother in another city was a rare delight.
 image: /_assets/images/cover-013.png
+image_width: 1024
+image_height: 1536
 layout: post
 title: The Memory of Fear
 ---
