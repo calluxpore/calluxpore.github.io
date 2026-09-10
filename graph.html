@@ -57,7 +57,7 @@ permalink: /graph/
 
   #graph-search:focus {
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+    box-shadow: 0 0 0 3px var(--accent-soft);
   }
 
   .search-icon {
@@ -334,17 +334,18 @@ permalink: /graph/
     // Main group inside SVG to hold all elements for zooming
     const mainGroup = svg.append('g');
 
-    // Premium custom colors for categories
+    // Category colours, tuned to the site accent. Each one clears 3:1 contrast
+    // against both the light (#faf8f4) and dark (#0e0e11) page backgrounds.
     const colors = [
-      '#0969da', // GitHub Blue
-      '#2da44e', // Green
-      '#8250df', // Purple
-      '#bf3989', // Magenta
-      '#bc4c00', // Orange
-      '#cf222e', // Red
-      '#005f5e', // Teal
-      '#1a7f37', // Dark green
-      '#8c5b00'  // Gold-brown
+      '#b8791f', // amber
+      '#c85f42', // terracotta
+      '#c04a74', // rose
+      '#9070c4', // violet
+      '#4f81ce', // blue
+      '#2f8579', // teal
+      '#6f8c46', // sage
+      '#a8743f', // clay
+      '#71768a'  // slate
     ];
 
     function getNodeColor(id) {

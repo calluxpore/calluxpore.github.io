@@ -1,52 +1,60 @@
 /* Fonts are preconnected and loaded via a stylesheet link in the layout head. */
 
 :root {
-  /* Color Palette - Light Mode (Clean Code) */
-  --bg-color: #fafafa;
-  --card-bg: #ffffff;
-  --text-main: #1f2328;
-  --text-muted: #57606a;
-  --accent-color: #0969da;
-  --accent-hover: #0550ae;
-  --accent-soft: rgba(9, 105, 218, 0.10);
-  --accent-ring: rgba(9, 105, 218, 0.45);
-  --border-color: rgba(31, 35, 40, 0.1);
-  --code-bg: #f3f4f6;
-  --code-text: #cf222e;
-  --blockquote-bg: rgba(9, 105, 218, 0.03);
-  --cell-level-0: #ebedf0;
-  --cell-level-1: #9be9a8;
-  --cell-level-2: #40c463;
-  --cell-level-3: #30a14e;
-  --cell-level-4: #216e39;
-  --container-width: 720px;
-  
-  --font-poppins: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-sans: 'Lora', Georgia, serif;
+  /* Light mode - warm paper and ink, not a dashboard */
+  --bg-color: #faf8f4;
+  --card-bg: #fffdf9;
+  --text-main: #1c1a17;
+  --text-muted: #6b6459;
+  --accent-color: #9a4b1b;
+  --accent-hover: #7d3a12;
+  --accent-soft: rgba(154, 75, 27, 0.09);
+  --accent-ring: rgba(154, 75, 27, 0.45);
+  --border-color: rgba(28, 26, 23, 0.13);
+  --rule-color: rgba(28, 26, 23, 0.09);
+  --code-bg: #f1ede4;
+  --code-text: #8a3a2e;
+  --blockquote-bg: transparent;
+
+  /* Activity ramp follows the accent instead of borrowing GitHub's green */
+  --cell-level-0: #e9e3d8;
+  --cell-level-1: #f0d3a6;
+  --cell-level-2: #e0ab63;
+  --cell-level-3: #c07f2e;
+  --cell-level-4: #8f4f16;
+
+  --container-width: 700px;
+
+  /* Two families only: an editorial serif, and mono for the chrome. */
+  --font-poppins: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Newsreader', Georgia, 'Times New Roman', serif;
   --font-mono: 'JetBrains Mono', Consolas, Monaco, monospace;
-  
+
   --transition-speed: 0.2s;
 }
 
 [data-theme="dark"] {
-  /* Color Palette - Dark Mode (Sleek Tech Theme) */
-  --bg-color: #0d1117;
-  --card-bg: #161b22;
-  --text-main: #e6edf3;
-  --text-muted: #8b949e;
-  --accent-color: #58a6ff;
-  --accent-hover: #91caff;
-  --accent-soft: rgba(88, 166, 255, 0.14);
-  --accent-ring: rgba(88, 166, 255, 0.55);
-  --border-color: rgba(240, 246, 252, 0.15);
-  --code-bg: #161b22;
-  --code-text: #ff7b72;
-  --blockquote-bg: rgba(88, 166, 255, 0.08);
-  --cell-level-0: #21262d;
-  --cell-level-1: #0e4429;
-  --cell-level-2: #006d32;
-  --cell-level-3: #26a641;
-  --cell-level-4: #39d353;
+  /* Dark mode - near-black with a warm ember accent, which sits well against
+     the monochrome cover art without the blue-on-slate SaaS look. */
+  --bg-color: #0e0e11;
+  --card-bg: #16161b;
+  --text-main: #e8e4dc;
+  --text-muted: #948c80;
+  --accent-color: #e8a33d;
+  --accent-hover: #f6c06b;
+  --accent-soft: rgba(232, 163, 61, 0.13);
+  --accent-ring: rgba(232, 163, 61, 0.55);
+  --border-color: rgba(232, 228, 220, 0.14);
+  --rule-color: rgba(232, 228, 220, 0.10);
+  --code-bg: #17171d;
+  --code-text: #dd9273;
+  --blockquote-bg: transparent;
+
+  --cell-level-0: #1c1c22;
+  --cell-level-1: #4a3618;
+  --cell-level-2: #7d5720;
+  --cell-level-3: #b3802a;
+  --cell-level-4: #e8a33d;
 }
 
 /* Base Styles */
@@ -318,24 +326,24 @@ pre code {
   background-color: transparent;
 }
 
-.highlight .c { color: #8e908c; font-style: italic; } /* Comment */
-.highlight .k { color: #8959a8; font-weight: normal; } /* Keyword */
-.highlight .s { color: #718c00; } /* String */
-.highlight .n { color: var(--text-main); } /* Name */
-.highlight .o { color: #3e999f; } /* Operator */
-.highlight .nb { color: #c82829; } /* Built-in */
-.highlight .nf { color: #4271ae; } /* Function */
-.highlight .nt { color: #c82829; } /* Tag */
+.highlight .c { color: #8d8577; font-style: italic; } /* Comment */
+.highlight .k { color: #8a4f9e; font-weight: 500; }   /* Keyword */
+.highlight .s { color: #5f7a3a; }                     /* String */
+.highlight .n { color: var(--text-main); }            /* Name */
+.highlight .o { color: #2f7f77; }                     /* Operator */
+.highlight .nb { color: #b4531a; }                    /* Built-in */
+.highlight .nf { color: #3d6da8; }                    /* Function */
+.highlight .nt { color: #a8412f; }                    /* Tag */
 
 /* Syntax Highlighting - Dark Mode */
-[data-theme="dark"] .highlight .c { color: #8b949e; }
-[data-theme="dark"] .highlight .k { color: #ff7b72; }
-[data-theme="dark"] .highlight .s { color: #a5d6ff; }
-[data-theme="dark"] .highlight .n { color: #e6edf3; }
-[data-theme="dark"] .highlight .o { color: #79c0ff; }
-[data-theme="dark"] .highlight .nb { color: #ffa657; }
-[data-theme="dark"] .highlight .nf { color: #d2a8ff; }
-[data-theme="dark"] .highlight .nt { color: #7ee787; }
+[data-theme="dark"] .highlight .c { color: #7f7768; }
+[data-theme="dark"] .highlight .k { color: #d59ae0; }
+[data-theme="dark"] .highlight .s { color: #a8c98a; }
+[data-theme="dark"] .highlight .n { color: var(--text-main); }
+[data-theme="dark"] .highlight .o { color: #6fc4ba; }
+[data-theme="dark"] .highlight .nb { color: #e8a33d; }
+[data-theme="dark"] .highlight .nf { color: #8fb6e8; }
+[data-theme="dark"] .highlight .nt { color: #e08b6f; }
 
 
 /* Footers */
@@ -527,7 +535,7 @@ pre code {
 .post-item-image-container:hover,
 .post-item-image-container:focus {
   border-color: var(--accent-color);
-  box-shadow: 0 4px 12px rgba(9, 105, 218, 0.1);
+  box-shadow: 0 4px 14px var(--accent-soft);
   outline: none;
 }
 
@@ -1318,4 +1326,368 @@ a.post-category-tag:focus-visible {
 /* Audio badge / listen link share the accent hover */
 .listen-audio-link:hover {
   color: var(--accent-hover) !important;
+}
+
+/* ============================================================
+   Editorial layer
+   Serif for anything the reader reads, mono for the chrome.
+   ============================================================ */
+
+body {
+  font-size: 1.02rem;
+  line-height: 1.72;
+  font-optical-sizing: auto;
+}
+
+/* --- Headings: serif display, tight, with real weight contrast --- */
+h1, h2, h3, h4, h5, h6,
+.post-title, .post-item-title, .posts-section-title,
+.post-content h1, .post-content h2, .post-content h3, .post-content h4 {
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.post-title {
+  font-size: 2.6rem;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+}
+
+.post-content h2 {
+  font-size: 1.7rem;
+  letter-spacing: -0.02em;
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-top: 3rem;
+  margin-bottom: 0.85rem;
+}
+
+.post-content h3 {
+  font-size: 1.32rem;
+  margin-top: 2.25rem;
+}
+
+/* --- Chrome stays mono: labels, nav, counters, controls --- */
+.site-logo,
+.read-more-link,
+.activity-panel-header,
+.activity-panel-footer,
+.weekday-label,
+.month-label,
+.contrib-tooltip,
+.player-label,
+.related-posts-title,
+.footer-link-title {
+  font-family: var(--font-mono);
+}
+
+.site-logo {
+  font-size: 0.98rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* The asterisk is the one piece of mark the site has - let it carry the accent. */
+.site-logo,
+.footer-title {
+  color: var(--text-main);
+}
+
+.site-logo::first-letter,
+.footer-title::first-letter {
+  color: var(--accent-color);
+}
+
+.read-more-link {
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* --- Reading column --- */
+.post-content {
+  font-size: 1.14rem;
+  line-height: 1.72;
+}
+
+.post-content p {
+  margin-bottom: 1.6rem;
+}
+
+/* The opening paragraph gets a touch more presence, the way a magazine
+   standfirst does, without resorting to a drop cap.
+   kramdown wraps a leading image in its own <p>, so skip that one and promote
+   the first paragraph that actually carries text. */
+.post-content > p:first-of-type:not(:has(> img)),
+.post-content > p:first-of-type:has(> img) + p {
+  font-size: 1.26rem;
+  line-height: 1.58;
+  color: var(--text-main);
+}
+
+/* --- Pull quotes: a hairline rule and italics, not a tinted box --- */
+blockquote {
+  margin: 2.75rem 0;
+  padding: 0 0 0 1.6rem;
+  border-left: 2px solid var(--accent-color);
+  background: none;
+  border-radius: 0;
+  font-family: var(--font-poppins);
+  font-size: 1.28rem;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--text-main);
+  opacity: 0.88;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--rule-color);
+  margin: 3rem 0;
+}
+
+/* --- Post header --- */
+.post-header {
+  margin-bottom: 2.5rem;
+}
+
+.post-meta {
+  font-size: 0.76rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  gap: 0.75rem;
+}
+
+/* --- Category chips: quieter, so five of them stop shouting --- */
+.post-category-tag {
+  background-color: transparent;
+  border: 1px solid var(--rule-color);
+  color: var(--text-muted);
+  font-size: 0.63rem;
+  letter-spacing: 0.07em;
+  padding: 0.18rem 0.45rem;
+  border-radius: 2px;
+}
+
+/* --- Home list --- */
+.posts-section-title {
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 2.25rem;
+}
+
+.post-item-title {
+  font-size: 1.6rem;
+  line-height: 1.15;
+  margin-bottom: 0.6rem;
+}
+
+.post-item-image-container {
+  width: 132px;
+  min-height: 176px;
+  border-radius: 4px;
+  border-color: var(--rule-color);
+}
+
+.post-excerpt {
+  font-size: 1.02rem;
+  line-height: 1.62;
+}
+
+.post-item {
+  gap: 2rem;
+  border-bottom-style: solid;
+  border-bottom-color: var(--rule-color);
+}
+
+.post-meta-container {
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* --- Filter buttons --- */
+.filter-btn {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-color: var(--rule-color);
+  border-radius: 2px;
+}
+
+.filter-btn.active {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: var(--bg-color);
+  box-shadow: none;
+}
+
+.filter-btn-toggle {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 2px;
+}
+
+/* --- Activity panel --- */
+.activity-panel-card {
+  background: none;
+  border: 1px solid var(--rule-color);
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+.activity-panel-header,
+.activity-panel-footer {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.year-btn {
+  border-radius: 2px;
+  border-color: var(--rule-color);
+}
+
+.calendar-cell,
+.legend-cell {
+  border-radius: 1px;
+}
+
+/* --- Header / footer --- */
+.site-header {
+  border-bottom-color: var(--rule-color);
+}
+
+.site-footer {
+  border-top-color: var(--rule-color);
+}
+
+.footer-link-title {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+}
+
+.footer-title {
+  font-family: var(--font-mono);
+  font-size: 0.98rem;
+  letter-spacing: -0.02em;
+}
+
+/* --- Cards --- */
+.post-nav-card,
+.related-card {
+  border-radius: 4px;
+  border-color: var(--rule-color);
+  background: none;
+}
+
+.post-nav-card:hover,
+.related-card:hover {
+  border-color: var(--accent-color);
+  background: var(--accent-soft);
+  box-shadow: none;
+}
+
+.post-nav-title,
+.related-card-title {
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.post-nav-label,
+.related-posts-title,
+.related-card-meta {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+}
+
+.post-navigation-grid {
+  border-top-color: var(--rule-color);
+}
+
+.related-posts {
+  border-top-color: var(--rule-color);
+}
+
+/* --- Code --- */
+pre {
+  border-color: var(--rule-color);
+  border-radius: 4px;
+}
+
+.highlight {
+  border-color: var(--rule-color);
+  border-radius: 4px;
+}
+
+code {
+  font-size: 0.86em;
+}
+
+/* --- Home standfirst --- */
+.home-intro {
+  margin: 0 0 2.75rem 0;
+  padding: 0;
+}
+
+.home-standfirst {
+  margin: 0;
+  max-width: 34em;
+  font-size: 1.22rem;
+  line-height: 1.55;
+  font-weight: 300;
+  color: var(--text-main);
+  opacity: 0.82;
+  text-wrap: pretty;
+}
+
+@media (max-width: 600px) {
+  .home-standfirst {
+    font-size: 1.08rem;
+  }
+}
+
+/* --- Hero --- */
+.post-hero img {
+  border-radius: 4px;
+  border-color: var(--rule-color);
+}
+
+/* --- In-article images --- */
+.post-content img {
+  border-radius: 4px;
+  border-color: var(--rule-color);
+  margin: 2.5rem auto;
+}
+
+/* kramdown puts standalone images in their own paragraph */
+.post-content p:has(> img) {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .post-title { font-size: 1.95rem; }
+  .post-item-title { font-size: 1.32rem; }
+  .post-content { font-size: 1.08rem; }
+  .post-content > p:first-of-type { font-size: 1.16rem; }
+  blockquote { font-size: 1.14rem; }
+}
+
+@media (max-width: 600px) {
+  .post-item-image-container {
+    width: 100%;
+    height: 200px;
+    min-height: 0;
+  }
 }

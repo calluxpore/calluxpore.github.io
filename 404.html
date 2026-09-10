@@ -9,18 +9,29 @@ layout: page
     text-align: center;
   }
   .not-found-title {
-    font-size: 5rem;
+    font-size: 6rem;
     font-family: var(--font-poppins);
     margin-top: 0;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     line-height: 1;
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    color: var(--accent-color);
+  }
+  .not-found-lead {
+    font-size: 1.25rem;
+    margin-bottom: 0.4rem;
+  }
+  .not-found-help {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
   }
 </style>
 
 <div class="not-found-wrapper">
   <h1 class="not-found-title">404</h1>
 
-  <p><strong>Page not found :(</strong></p>
-  <p>The requested page could not be found.</p>
+  <p class="not-found-lead">This page could not be found.</p>
+  <p class="not-found-help">It may have moved, or the link may be out of date.</p>
+  <p><a class="read-more-link" href="{{ '/' | relative_url }}">Back to the writing</a></p>
 </div>
