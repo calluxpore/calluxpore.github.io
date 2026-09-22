@@ -70,10 +70,12 @@ def optimise_image(path: str) -> None:
             resized = img.copy()
             resized.thumbnail((MAX_IMAGE_EDGE, MAX_IMAGE_EDGE), Image.LANCZOS)
 
-            if fmt == "PNG":
-                # Photographic PNGs shrink a lot when palettised; keep alpha intact.
+            ext = os.path.splitext(path)[1].lower()
+            if ext == ".png":
+                if resized.mode not in ("RGBA", "RGB", "P", "LA", "L"):
+                    resized = resized.convert("RGBA")
                 resized.save(path, "PNG", optimize=True)
-            elif fmt == "WEBP":
+            elif ext == ".webp":
                 resized.save(path, "WEBP", quality=WEBP_QUALITY, method=6)
             else:
                 if resized.mode in ("RGBA", "P", "LA"):
