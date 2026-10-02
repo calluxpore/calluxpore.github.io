@@ -51,6 +51,7 @@ feed:
 
 # Build settings
 # theme: minima
+future: true
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
