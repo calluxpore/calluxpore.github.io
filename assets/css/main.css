@@ -1,4 +1,38 @@
-/* Fonts are preconnected and loaded via a stylesheet link in the layout head. */
+/* Fonts are self-hosted from /_fonts and preloaded in the layout head.
+   - Atkinson Hyperlegible (regular + bold) for content & interface
+   - MonoLisa (regular + bold) for code, technical labels, and the site logo
+   Only regular/bold files exist, so 300-500 map to regular and 600-700 to bold. */
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('../../_fonts/Atkinson-Hyperlegible-Regular-102.ttf') format('truetype');
+  font-weight: 300 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('../../_fonts/Atkinson-Hyperlegible-Bold-102.ttf') format('truetype');
+  font-weight: 600 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MonoLisa';
+  src: url('../../_fonts/MonoLisa-Regular.ttf') format('truetype');
+  font-weight: 300 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MonoLisa';
+  src: url('../../_fonts/MonoLisa-Bold.ttf') format('truetype');
+  font-weight: 600 800;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   /* Light mode - warm paper and ink, not a dashboard */
@@ -25,10 +59,10 @@
 
   --container-width: 700px;
 
-  /* Two families only: an editorial serif, and mono for the chrome. */
-  --font-poppins: 'Newsreader', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Newsreader', Georgia, 'Times New Roman', serif;
-  --font-mono: 'JetBrains Mono', Consolas, Monaco, monospace;
+  /* Two families only: Atkinson Hyperlegible for reading, MonoLisa for the chrome. */
+  --font-poppins: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'MonoLisa', Consolas, Monaco, monospace;
 
   --transition-speed: 0.2s;
 }
@@ -169,7 +203,7 @@ strong, b {
 }
 
 .site-logo {
-  font-family: var(--font-poppins);
+  font-family: var(--font-mono);
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-main);
