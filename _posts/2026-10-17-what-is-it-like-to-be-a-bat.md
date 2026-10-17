@@ -9,8 +9,8 @@ description: The bat came in through the window one summer evening at my grandpa
   house, in that blue half hour after the lights go on and before anyone thinks to
   close the shutters.
 image: /_assets/images/cover-021.jpg
-image_height: 715
-image_width: 480
+image_height: 1600
+image_width: 1016
 layout: post
 title: What Is It Like to Be a Bat?
 ---
