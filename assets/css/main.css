@@ -2227,3 +2227,32 @@ code {
   .post-item, .filter-btn, .listen-audio-link { transition: none; }
   .post-item:hover { transform: none; }
 }
+
+/* --- No image zoom on hover: only the card itself animates --- */
+.post-item:hover .post-item-image,
+.post-item-image {
+  transform: none !important;
+  transition: none;
+}
+
+/* --- Hero in dark mode: let the art emerge from the dark instead of fading through grey --- */
+[data-theme="dark"] .home-intro-art {
+  border-radius: 0;
+  -webkit-mask-image: radial-gradient(ellipse 62% 70% at 68% 46%, #000 30%, rgba(0, 0, 0, 0.55) 55%, transparent 100%);
+  mask-image: radial-gradient(ellipse 62% 70% at 68% 46%, #000 30%, rgba(0, 0, 0, 0.55) 55%, transparent 100%);
+  -webkit-mask-composite: source-over;
+  mask-composite: add;
+}
+
+[data-theme="dark"] .home-intro-art img {
+  filter: brightness(0.5) contrast(1.35) saturate(1.25);
+  mix-blend-mode: screen;
+  object-position: 68% 40%;
+}
+
+@media (max-width: 700px) {
+  [data-theme="dark"] .home-intro-art {
+    -webkit-mask-image: radial-gradient(ellipse 80% 80% at 60% 45%, #000 35%, transparent 100%);
+    mask-image: radial-gradient(ellipse 80% 80% at 60% 45%, #000 35%, transparent 100%);
+  }
+}
