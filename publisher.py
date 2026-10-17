@@ -173,8 +173,11 @@ def generate_tts_for_post(post_name: str, content: str, voice: str = DEFAULT_TTS
     dest_path = os.path.join(JEKYLL_TTS_DIR, audio_filename)
     
     if os.path.exists(dest_path):
-        print(f"🔊 Audio file already exists: '{dest_path}'")
-        return dest_path
+        if os.path.getsize(dest_path) > 0:
+            print(f"🔊 Audio file already exists: '{dest_path}'")
+            return dest_path
+        print(f"⚠️ Found empty audio file, regenerating: '{dest_path}'")
+        os.remove(dest_path)
         
     plain_text = strip_markdown_for_speech(content)
     if not plain_text.strip():
@@ -182,15 +185,21 @@ def generate_tts_for_post(post_name: str, content: str, voice: str = DEFAULT_TTS
         return None
         
     print(f"🎙️ Synthesizing TTS audio for '{post_name}' using edge-tts ({voice})...")
+    tmp_path = dest_path + ".tmp"
     try:
         async def _speak():
             communicate = edge_tts.Communicate(plain_text, voice)
-            await communicate.save(dest_path)
+            await communicate.save(tmp_path)
             
         asyncio.run(_speak())
+        if not os.path.exists(tmp_path) or os.path.getsize(tmp_path) == 0:
+            raise RuntimeError("edge-tts produced an empty audio file")
+        os.replace(tmp_path, dest_path)
         print(f"✅ Generated TTS audio: '{dest_path}'")
         return dest_path
     except Exception as e:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
         print(f"❌ Error generating TTS audio for '{post_name}': {str(e)}")
         return None
 
@@ -204,7 +213,7 @@ def process_existing_posts_tts():
         if file.endswith('.md') or file.endswith('.markdown'):
             post_name = os.path.splitext(file)[0]
             audio_path = os.path.join(JEKYLL_TTS_DIR, f"{post_name}.mp3")
-            if not os.path.exists(audio_path):
+            if not os.path.exists(audio_path) or os.path.getsize(audio_path) == 0:
                 post_path = os.path.join(JEKYLL_POSTS_DIR, file)
                 try:
                     post = frontmatter.load(post_path)
