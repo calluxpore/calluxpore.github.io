@@ -1726,3 +1726,169 @@ code {
     aspect-ratio: auto;
   }
 }
+
+/* --- Home: post index sidebar ---
+   Lives in the empty right-hand gutter beside the 700px column, so it only
+   appears when there is room for it; on smaller screens it is not rendered. */
+.home-layout {
+  position: relative;
+}
+
+.post-index {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .post-index {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(100% + 1.5rem + 2.5rem);
+    width: min(264px, calc(50vw - 350px - 5rem));
+  }
+}
+
+.post-index-inner {
+  position: sticky;
+  top: 2rem;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 4rem);
+}
+
+.post-index-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 0 0.75rem 1rem;
+  border-bottom: 1px solid var(--rule-color);
+}
+
+.post-index-label,
+.post-index-count,
+.post-index-month {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.post-index-count {
+  letter-spacing: 0.02em;
+}
+
+.post-index-scroll {
+  position: relative;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.25rem 0 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+  /* Soft fade where the list runs under the edges. */
+  mask-image: linear-gradient(to bottom, transparent 0, #000 0.75rem, #000 calc(100% - 2rem), transparent 100%);
+}
+
+/* The rail and its sliding accent marker. */
+.post-index-scroll::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  background: var(--rule-color);
+}
+
+.post-index-marker {
+  position: absolute;
+  top: 0;
+  left: -0.5px;
+  width: 2px;
+  height: 0;
+  border-radius: 2px;
+  background: var(--accent-color);
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), height 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+}
+
+.post-index-group[hidden],
+.post-index-list li[hidden] {
+  display: none;
+}
+
+.post-index-month {
+  margin: 1.1rem 0 0.35rem;
+  padding: 0 0 0 1rem;
+  border: 0;
+  font-size: 0.64rem;
+  line-height: 1.4;
+}
+
+.post-index-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.post-index-link {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.38rem 0.5rem 0.38rem 1rem;
+  border-radius: 0 6px 6px 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.38;
+  text-decoration: none;
+  transition: color 0.25s ease, background-color 0.25s ease;
+}
+
+.post-index-link:hover {
+  color: var(--text-main);
+  background-color: var(--accent-soft);
+}
+
+.post-index-link:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: -2px;
+}
+
+.post-index-link.is-active {
+  color: var(--text-main);
+}
+
+.post-index-title {
+  flex: 1;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-index-link.is-active .post-index-title {
+  font-weight: 700;
+}
+
+.post-index-date {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A brief glow on the post you jumped to. */
+.post-item.is-arrived {
+  border-radius: 10px;
+  animation: post-arrived 1.6s ease-out;
+}
+
+@keyframes post-arrived {
+  0% { background-color: var(--accent-soft); box-shadow: 0 0 0 1rem var(--accent-soft); }
+  100% { background-color: transparent; box-shadow: 0 0 0 1rem transparent; }
+}

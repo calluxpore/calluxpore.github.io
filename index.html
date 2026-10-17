@@ -17,6 +17,42 @@ title: Home
 {% endfor %}
 {% assign all_categories = categories_list | split: "," | sort %}
 
+<div class="home-layout">
+
+{% if site.posts.size > 0 %}
+<!-- Post index: a sticky "on this page" list in the right gutter (wide screens only) -->
+<aside class="post-index" aria-label="All posts">
+  <div class="post-index-inner">
+    <div class="post-index-head">
+      <span class="post-index-label">Index</span>
+      <span class="post-index-count" id="post-index-count">{{ site.posts.size }}</span>
+    </div>
+    <nav class="post-index-scroll" id="post-index-scroll">
+      <span class="post-index-marker" id="post-index-marker" aria-hidden="true"></span>
+      {% assign index_month = "" %}
+      {% for post in site.posts %}
+      {% assign post_month = post.date | date: "%B %Y" %}
+      {% if post_month != index_month %}
+      {% unless forloop.first %}</ol></div>{% endunless %}
+      <div class="post-index-group">
+        <h2 class="post-index-month">{{ post.date | date: "%b %Y" }}</h2>
+        <ol class="post-index-list">
+      {% assign index_month = post_month %}
+      {% endif %}
+      {% assign index_slug = post.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' | slugify %}
+          <li>
+            <a class="post-index-link" href="#post-{{ index_slug }}" data-target="post-{{ index_slug }}">
+              <span class="post-index-title">{{ post.title | escape }}</span>
+              <time class="post-index-date" datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%-d" }}</time>
+            </a>
+          </li>
+      {% if forloop.last %}</ol></div>{% endif %}
+      {% endfor %}
+    </nav>
+  </div>
+</aside>
+{% endif %}
+
 <section class="home-intro">
   <p class="home-standfirst">
     Welcome to my Mind Palace. Here, I dive deep into the design, code, and thinking behind everything I build. Take a
@@ -81,7 +117,7 @@ title: Home
     {% assign audio_file = site.static_files | where: "name", target_audio_name | first %}
     {% assign has_audio = false %}
     {% if audio_file %}{% assign has_audio = true %}{% endif %}
-    <li class="post-item"
+    <li class="post-item" id="post-{{ post_name | slugify }}"
       data-categories="all,{% for category in post.categories %}{{ category | downcase | replace: ' ', '-' }}{% if forloop.last == false %},{% endif %}{% endfor %}">
       
       <!-- Post Image -->
@@ -169,6 +205,8 @@ title: Home
   {% endif %}
 </section>
 
+</div>
+
 <script id="jekyll-post-dates" type="application/json">
   [
     {% for post in site.posts %}
@@ -198,6 +236,8 @@ title: Home
           post.style.display = "none";
         }
       });
+
+      document.dispatchEvent(new CustomEvent("posts:filtered"));
     }
 
     buttons.forEach(btn => {
@@ -429,5 +469,171 @@ title: Home
         renderYear(years[0]);
       }
     }
+  });
+</script>
+<script>
+  // --- Post index sidebar: smooth scroll + scrollspy ---
+  document.addEventListener("DOMContentLoaded", function () {
+    const index = document.querySelector(".post-index");
+    if (!index) return;
+
+    const scroller = document.getElementById("post-index-scroll");
+    const marker = document.getElementById("post-index-marker");
+    const countEl = document.getElementById("post-index-count");
+    const links = [...index.querySelectorAll(".post-index-link")];
+    const entries = links
+      .map(link => ({ link, post: document.getElementById(link.dataset.target) }))
+      .filter(e => e.post);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sidebarShown = () => getComputedStyle(index).display !== "none";
+
+    let active = null;
+    let animating = false;
+    let cancelScroll = null;
+
+    // Slide the accent marker to the active link.
+    function placeMarker() {
+      if (!active || active.link.offsetParent === null) {
+        marker.style.opacity = "0";
+        return;
+      }
+      const top = active.link.offsetTop;
+      marker.style.opacity = "1";
+      marker.style.transform = `translateY(${top}px)`;
+      marker.style.height = `${active.link.offsetHeight}px`;
+    }
+
+    // Keep the active link visible inside the sidebar's own scroll area.
+    function revealInSidebar(link) {
+      const pad = 48;
+      const top = link.offsetTop;
+      const bottom = top + link.offsetHeight;
+      if (top < scroller.scrollTop + pad) {
+        scroller.scrollTo({ top: top - pad, behavior: reducedMotion.matches ? "auto" : "smooth" });
+      } else if (bottom > scroller.scrollTop + scroller.clientHeight - pad) {
+        scroller.scrollTo({ top: bottom - scroller.clientHeight + pad, behavior: reducedMotion.matches ? "auto" : "smooth" });
+      }
+    }
+
+    function setActive(entry) {
+      if (entry === active) return;
+      if (active) {
+        active.link.classList.remove("is-active");
+        active.link.removeAttribute("aria-current");
+      }
+      active = entry;
+      if (active) {
+        active.link.classList.add("is-active");
+        active.link.setAttribute("aria-current", "true");
+        revealInSidebar(active.link);
+      }
+      placeMarker();
+    }
+
+    // The active post is the last visible one whose top has passed 35% of the viewport.
+    function updateActive() {
+      if (!sidebarShown()) return;
+      const line = window.innerHeight * 0.35;
+      let current = null;
+      for (const e of entries) {
+        if (e.post.style.display === "none") continue;
+        if (e.post.getBoundingClientRect().top <= line) current = e;
+        else if (current) break;
+      }
+      if (!current) current = entries.find(e => e.post.style.display !== "none") || null;
+      setActive(current);
+    }
+
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (animating || ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { ticking = false; updateActive(); });
+    }, { passive: true });
+    window.addEventListener("resize", () => { placeMarker(); updateActive(); }, { passive: true });
+
+    // Mirror the category filter: hide links (and empty months) for filtered-out posts.
+    function syncWithFilter() {
+      let visible = 0;
+      entries.forEach(e => {
+        const shown = e.post.style.display !== "none";
+        e.link.parentElement.hidden = !shown;
+        if (shown) visible++;
+      });
+      index.querySelectorAll(".post-index-group").forEach(group => {
+        group.hidden = !group.querySelector("li:not([hidden])");
+      });
+      countEl.textContent = visible === entries.length ? entries.length : `${visible} of ${entries.length}`;
+      active = null;
+      updateActive();
+    }
+
+    document.addEventListener("posts:filtered", syncWithFilter);
+
+    // Eased scroll: quick to start, long gentle landing. Duration grows with distance.
+    const ease = t => (t < 0.5 ? 16 * t ** 5 : 1 - Math.pow(-2 * t + 2, 5) / 2);
+
+    function smoothScrollTo(targetY, done) {
+      if (cancelScroll) cancelScroll();
+      const startY = window.scrollY;
+      const maxY = document.documentElement.scrollHeight - window.innerHeight;
+      const endY = Math.max(0, Math.min(targetY, maxY));
+      const distance = endY - startY;
+
+      if (reducedMotion.matches || Math.abs(distance) < 2) {
+        window.scrollTo(0, endY);
+        done();
+        return;
+      }
+
+      const duration = Math.min(1400, 550 + Math.sqrt(Math.abs(distance)) * 14);
+      let start = null;
+      let frame = null;
+      animating = true;
+
+      const stop = () => {
+        cancelAnimationFrame(frame);
+        animating = false;
+        cancelScroll = null;
+        ["wheel", "touchstart", "keydown"].forEach(t => window.removeEventListener(t, stop));
+      };
+      // Any manual scroll input hands control straight back to the reader.
+      ["wheel", "touchstart", "keydown"].forEach(t => window.addEventListener(t, stop, { passive: true }));
+      cancelScroll = stop;
+
+      const step = now => {
+        if (start === null) start = now;
+        const t = Math.min(1, (now - start) / duration);
+        window.scrollTo(0, startY + distance * ease(t));
+        if (t < 1) {
+          frame = requestAnimationFrame(step);
+        } else {
+          stop();
+          done();
+        }
+      };
+      frame = requestAnimationFrame(step);
+    }
+
+    entries.forEach(entry => {
+      entry.link.addEventListener("click", event => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+        event.preventDefault();
+        setActive(entry);
+        const y = entry.post.getBoundingClientRect().top + window.scrollY - 40;
+        smoothScrollTo(y, () => {
+          updateActive();
+          entry.post.classList.remove("is-arrived");
+          void entry.post.offsetWidth; // restart the arrival highlight
+          entry.post.classList.add("is-arrived");
+          const titleLink = entry.post.querySelector(".post-item-title a");
+          if (titleLink) titleLink.focus({ preventScroll: true });
+        });
+      });
+    });
+
+    entries.forEach(e => e.post.addEventListener("animationend", () => e.post.classList.remove("is-arrived")));
+
+    syncWithFilter();
   });
 </script>
