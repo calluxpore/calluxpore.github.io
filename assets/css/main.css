@@ -1998,12 +1998,9 @@ code {
 .activity-panel-summary { font-size: 0.95rem; color: var(--text-soft); }
 
 .activity-panel-summary strong {
-  font-size: 1.7rem;
-  line-height: 1;
+  font-size: inherit;
   font-weight: 700;
   color: var(--accent-color);
-  margin-right: 0.15rem;
-  letter-spacing: -0.02em;
 }
 
 .calendar-board {
