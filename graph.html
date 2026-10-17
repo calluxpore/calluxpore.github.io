@@ -4,726 +4,1445 @@ title: Tag Graph
 permalink: /graph/
 ---
 
-<p class="lead">An interactive force-directed map of the categories on this blog. Drag nodes to explore relationships, zoom/pan to navigate, and hover over a node to view its articles.</p>
+<p class="lead">A map of the ideas on this blog. Each dot is a category, sized by how many posts use it; lines join categories that appear together. Colours mark clusters of closely related topics. Select a category to see its posts.</p>
 
-<div class="graph-header-controls">
-  <div class="search-container">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="graph-search" placeholder="Search categories..." autocomplete="off" />
-    <div id="search-suggestions" class="search-suggestions-box"></div>
+<section class="tg" id="tag-graph" aria-label="Interactive tag graph">
+  <div class="tg-toolbar">
+    <div class="tg-search">
+      <svg class="tg-search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.2" y2="16.2"></line></svg>
+      <input type="search" id="tg-search-input" placeholder="Find a category" autocomplete="off" spellcheck="false"
+             role="combobox" aria-expanded="false" aria-controls="tg-suggestions" aria-autocomplete="list" aria-label="Find a category">
+      <kbd class="tg-kbd" aria-hidden="true">/</kbd>
+      <ul id="tg-suggestions" class="tg-suggestions" role="listbox" hidden></ul>
+    </div>
+    <p class="tg-stats" id="tg-stats"></p>
+    <button type="button" class="tg-btn tg-expand" id="tg-expand" aria-pressed="false" title="Full screen (F)">
+      <svg class="tg-icon-expand" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+      <svg class="tg-icon-collapse" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+      <span class="tg-expand-label">Expand</span>
+    </button>
   </div>
-</div>
 
-<div class="graph-wrapper">
-  <div id="graph-container"></div>
-  <div id="graph-tooltip" class="graph-tooltip" style="opacity: 0; pointer-events: none;"></div>
-  
-  <!-- Floating zoom/pan controls -->
-  <div class="graph-controls-box">
-    <button id="zoom-in" title="Zoom In">＋</button>
-    <button id="zoom-out" title="Zoom Out">－</button>
-    <button id="zoom-reset" title="Reset View">⟲</button>
+  <div class="tg-stage">
+    <div id="tg-canvas" class="tg-canvas"></div>
+
+    <div id="tg-tooltip" class="tg-tooltip" aria-hidden="true"></div>
+
+    <div class="tg-zoom" role="group" aria-label="Zoom controls">
+      <button type="button" class="tg-btn" id="tg-zoom-in" title="Zoom in (+)" aria-label="Zoom in">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </button>
+      <button type="button" class="tg-btn" id="tg-zoom-out" title="Zoom out (−)" aria-label="Zoom out">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </button>
+      <button type="button" class="tg-btn" id="tg-zoom-fit" title="Fit to view (0)" aria-label="Fit graph to view">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4"></path><path d="M15 4h4a1 1 0 0 1 1 1v4"></path><path d="M20 15v4a1 1 0 0 1-1 1h-4"></path><path d="M9 20H5a1 1 0 0 1-1-1v-4"></path><circle cx="12" cy="12" r="2.5"></circle></svg>
+      </button>
+    </div>
+
+    <div id="tg-hint" class="tg-hint" aria-hidden="true"></div>
+
+    <aside id="tg-panel" class="tg-panel" aria-live="polite" hidden>
+      <div class="tg-panel-head">
+        <span class="tg-panel-dot" id="tg-panel-dot"></span>
+        <div class="tg-panel-titles">
+          <h2 class="tg-panel-title" id="tg-panel-title"></h2>
+          <p class="tg-panel-meta" id="tg-panel-meta"></p>
+        </div>
+        <button type="button" class="tg-btn tg-panel-close" id="tg-panel-close" aria-label="Close" title="Close (Esc)">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="tg-panel-body">
+        <h3 class="tg-panel-label">Posts</h3>
+        <ol class="tg-posts" id="tg-panel-posts"></ol>
+        <h3 class="tg-panel-label" id="tg-related-label">Often appears with</h3>
+        <div class="tg-chips" id="tg-panel-related"></div>
+      </div>
+    </aside>
   </div>
-  
-  <!-- Scroll Zoom Hint -->
-  <div id="zoom-hint" class="zoom-hint">Use Ctrl + Scroll to zoom</div>
-</div>
+
+  <div class="tg-footer">
+    <div class="tg-legend" id="tg-legend" role="group" aria-label="Topic clusters"></div>
+    <p class="tg-help" id="tg-help"></p>
+  </div>
+</section>
+
+<details class="tg-index">
+  <summary>Browse all categories</summary>
+  <div class="tg-index-list" id="tg-index"></div>
+</details>
+
+<noscript><p>The tag graph needs JavaScript. You can still browse every post from the <a href="{{ '/' | relative_url }}">home page</a>.</p></noscript>
 
 <style>
-  .graph-header-controls {
-    display: flex;
-    margin-bottom: 1.25rem;
-    align-items: center;
-  }
+  /* ---------- Shell: break out of the 700px reading column ---------- */
+  .tg {
+    --tg-width: min(1200px, calc(100vw - 2.5rem));
+    --tg-link: color-mix(in srgb, var(--text-main) 16%, transparent);
+    --tg-link-strong: color-mix(in srgb, var(--text-main) 28%, transparent);
+    --tg-dot-grid: color-mix(in srgb, var(--text-main) 7%, transparent);
+    --tg-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 32px -12px rgba(0, 0, 0, 0.18);
+    --tg-panel-w: 320px;
 
-  .search-container {
     position: relative;
-    width: 280px;
-    max-width: 100%;
-  }
-
-  #graph-search {
-    width: 100%;
-    padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+    width: var(--tg-width);
+    margin: 2.25rem 0 1.5rem calc(50% - var(--tg-width) / 2);
+    display: flex;
+    flex-direction: column;
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-family: var(--font-poppins);
-    font-size: 0.85rem;
-    outline: none;
-    background-color: var(--card-bg);
+    border-radius: 14px;
+    background: var(--card-bg);
+    box-shadow: var(--tg-shadow);
+    overflow: hidden;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    line-height: 1.4;
     color: var(--text-main);
-    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease, background-color var(--transition-speed) ease;
   }
 
-  #graph-search:focus {
+  [data-theme="dark"] .tg {
+    --tg-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 40px -16px rgba(0, 0, 0, 0.7);
+  }
+
+  .tg.is-expanded {
+    position: fixed;
+    inset: 0;
+    width: auto;
+    margin: 0;
+    border-radius: 0;
+    border: 0;
+    z-index: 1000;
+  }
+
+  .tg button { font: inherit; }
+
+  /* ---------- Toolbar ---------- */
+  .tg-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.75rem 0.7rem 0.85rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--card-bg);
+    position: relative;
+    z-index: 6;
+  }
+
+  .tg-search {
+    position: relative;
+    flex: 0 1 300px;
+    min-width: 0;
+  }
+
+  .tg-search-icon {
+    position: absolute;
+    left: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  #tg-search-input {
+    width: 100%;
+    height: 2.25rem;
+    padding: 0 2.2rem 0 2.2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-color);
+    color: var(--text-main);
+    font: inherit;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+  }
+
+  #tg-search-input::placeholder { color: var(--text-muted); }
+  #tg-search-input::-webkit-search-cancel-button { display: none; }
+
+  #tg-search-input:focus {
     border-color: var(--accent-color);
     box-shadow: 0 0 0 3px var(--accent-soft);
   }
 
-  .search-icon {
+  .tg-kbd {
     position: absolute;
-    left: 0.75rem;
-    top: 52%;
+    right: 0.55rem;
+    top: 50%;
     transform: translateY(-50%);
-    font-size: 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    line-height: 1;
+    padding: 0.2rem 0.4rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
     color: var(--text-muted);
     pointer-events: none;
+    transition: opacity var(--transition-speed) ease;
   }
 
-  .search-suggestions-box {
+  #tg-search-input:focus ~ .tg-kbd,
+  #tg-search-input:not(:placeholder-shown) ~ .tg-kbd { opacity: 0; }
+
+  .tg-suggestions {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 6px);
     left: 0;
-    width: 100%;
-    background-color: var(--card-bg);
+    right: 0;
+    margin: 0;
+    padding: 0.3rem;
+    list-style: none;
+    background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-    z-index: 20;
-    max-height: 200px;
+    border-radius: 10px;
+    box-shadow: var(--tg-shadow);
+    max-height: 280px;
     overflow-y: auto;
-    display: none;
-    margin-top: 4px;
+    z-index: 20;
   }
 
-  .suggestion-item {
-    padding: 0.5rem 0.75rem;
+  .tg-suggestion {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 0.82rem;
-    font-family: var(--font-poppins);
-    color: var(--text-main);
-    transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
-  }
-
-  .suggestion-item:hover, .suggestion-item.active {
-    background-color: var(--code-bg);
-    color: var(--accent-color);
-  }
-
-  .graph-wrapper {
-    position: relative;
-    width: 100%;
-    margin: 1.5rem 0;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--card-bg);
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.005), 0 4px 12px rgba(0, 0, 0, 0.015);
-    overflow: hidden;
-    transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
-  }
-
-  #graph-container {
-    width: 100%;
-    height: 550px;
-    background-color: var(--bg-color);
-    cursor: grab;
-    transition: background-color var(--transition-speed) ease;
-  }
-
-  #graph-container:active {
-    cursor: grabbing;
-  }
-
-  /* Tooltip styling */
-  .graph-tooltip {
-    position: absolute;
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    font-family: var(--font-poppins);
-    font-size: 0.82rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    z-index: 10;
-    width: 260px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s ease-in-out, background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
-  }
-
-  .graph-tooltip-title {
-    font-family: var(--font-poppins);
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: var(--accent-color);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.25rem;
     font-size: 0.88rem;
   }
 
-  .graph-tooltip-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
+  .tg-suggestion[aria-selected="true"] { background: var(--accent-soft); }
+  .tg-suggestion mark { background: none; color: var(--accent-color); font-weight: 700; }
+  .tg-suggestion-count { margin-left: auto; font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted); }
+  .tg-suggestion-empty { padding: 0.6rem; color: var(--text-muted); font-size: 0.85rem; }
 
-  .graph-tooltip-item {
-    margin-bottom: 0.5rem;
-    line-height: 1.35;
-  }
-
-  .graph-tooltip-item:last-child {
-    margin-bottom: 0;
-  }
-
-  .graph-tooltip-link {
-    color: var(--text-main);
-    text-decoration: none;
-    font-weight: 400;
-    transition: color var(--transition-speed) ease;
-    display: inline-block;
-  }
-
-  .graph-tooltip-link:hover {
-    color: var(--accent-color);
-    text-decoration: underline;
-  }
-
-  /* SVG elements styling */
-  .graph-node circle {
-    stroke: var(--card-bg);
-    stroke-width: 2px;
-    cursor: pointer;
-    transition: fill var(--transition-speed) ease, stroke var(--transition-speed) ease, stroke-width var(--transition-speed) ease, opacity var(--transition-speed) ease;
-  }
-
-  .graph-node text {
+  .tg-stats {
+    margin: 0 0 0 auto !important;
     font-family: var(--font-mono);
-    font-size: 0.7rem;
-    pointer-events: none;
-    user-select: none;
-    paint-order: stroke;
-    stroke: var(--bg-color);
-    stroke-width: 3px;
-    stroke-linejoin: round;
-    fill: var(--text-muted);
-    transition: opacity 0.25s ease, font-size 0.25s ease, font-weight 0.25s ease, fill 0.25s ease, stroke 0.25s ease;
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    color: var(--text-muted) !important;
+    white-space: nowrap;
   }
 
-  .graph-link {
-    stroke: var(--border-color);
-    stroke-opacity: 0.7;
-    transition: stroke var(--transition-speed) ease, stroke-opacity var(--transition-speed) ease;
-  }
-
-  .graph-controls-box {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    z-index: 5;
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 2px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .graph-controls-box button {
-    background: transparent;
-    border: none;
-    width: 28px;
-    height: 28px;
-    display: flex;
+  .tg-btn {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.95rem;
-    cursor: pointer;
+    gap: 0.4rem;
+    min-width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
     color: var(--text-muted);
-    transition: all var(--transition-speed) ease;
-    border-radius: 4px;
-    outline: none;
+    cursor: pointer;
+    transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease, border-color var(--transition-speed) ease;
   }
 
-  .graph-controls-box button:hover {
-    background-color: var(--code-bg);
-    color: var(--text-main);
+  .tg-btn:hover { background: var(--code-bg); color: var(--text-main); }
+  .tg-btn:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 1px; }
+
+  .tg-expand {
+    padding: 0 0.75rem;
+    border-color: var(--border-color);
+    font-size: 0.82rem;
   }
 
-  .zoom-hint {
+  .tg-icon-collapse { display: none; }
+  .tg.is-expanded .tg-icon-expand { display: none; }
+  .tg.is-expanded .tg-icon-collapse { display: block; }
+
+  /* ---------- Stage ---------- */
+  .tg-stage {
+    position: relative;
+    height: clamp(460px, 70vh, 780px);
+    background-color: var(--bg-color);
+    background-image: radial-gradient(var(--tg-dot-grid) 1px, transparent 1px);
+    background-size: 22px 22px;
+    overflow: hidden;
+  }
+
+  .tg.is-expanded .tg-stage { flex: 1; height: auto; }
+
+  .tg-canvas { position: absolute; inset: 0; }
+
+  .tg-canvas svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tg-canvas svg:active { cursor: grabbing; }
+
+  /* Links */
+  .tg-link {
+    stroke: var(--tg-link);
+    stroke-linecap: round;
+    fill: none;
+    transition: stroke 0.25s ease, opacity 0.25s ease;
+  }
+
+  .tg-link.is-strong { stroke: var(--tg-link-strong); }
+  .tg-link.is-dim { opacity: 0.12; }
+  .tg-link.is-active { stroke: var(--link-color); opacity: 0.85; }
+
+  /* Nodes */
+  .tg-node { cursor: pointer; outline: none; touch-action: none; }
+
+  .tg-node-halo {
+    fill: var(--node-color);
+    opacity: 0;
+    transition: opacity 0.25s ease, r 0.25s ease;
+  }
+
+  .tg-node-dot {
+    fill: var(--node-color);
+    stroke: var(--bg-color);
+    stroke-width: 2.5px;
+    transition: opacity 0.25s ease;
+  }
+
+  .tg-node-label {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    fill: var(--text-muted);
+    paint-order: stroke;
+    stroke: var(--bg-color);
+    stroke-width: 4px;
+    stroke-linejoin: round;
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 0.25s ease, fill 0.25s ease;
+  }
+
+  .tg-node.is-major .tg-node-label { fill: var(--text-main); font-weight: 700; font-size: 13px; }
+  .tg-node.is-minor .tg-node-label { opacity: 0.85; }
+
+  /* Small tags' labels hide when zoomed far out, unless the tag is in focus. */
+  .tg-canvas.is-far .tg-node.is-minor:not(.is-focus):not(.is-neighbor):not(.is-match) .tg-node-label { opacity: 0; }
+
+  .tg-node:hover .tg-node-halo,
+  .tg-node:focus-visible .tg-node-halo,
+  .tg-node.is-neighbor .tg-node-halo { opacity: 0.18; }
+  .tg-node.is-focus .tg-node-halo,
+  .tg-node.is-match .tg-node-halo { opacity: 0.28; }
+  .tg-node:focus-visible .tg-node-dot { stroke: var(--accent-color); }
+
+  .tg-node.is-focus .tg-node-label,
+  .tg-node.is-match .tg-node-label { fill: var(--text-main); font-weight: 700; opacity: 1; }
+  .tg-node.is-neighbor .tg-node-label { fill: var(--text-main); opacity: 1; }
+
+  .tg-node.is-dim .tg-node-dot { opacity: 0.16; }
+  .tg-node.is-dim .tg-node-label { opacity: 0.12; }
+
+  /* ---------- Hover tooltip ---------- */
+  .tg-tooltip {
     position: absolute;
-    top: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(31, 35, 40, 0.9);
-    color: #ffffff;
-    padding: 0.4rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.72rem;
-    font-family: var(--font-poppins);
-    z-index: 5;
+    top: 0;
+    left: 0;
+    padding: 0.4rem 0.65rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+    box-shadow: var(--tg-shadow);
+    font-size: 0.8rem;
+    white-space: nowrap;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.25s ease;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transform: translate(-50%, calc(-100% - 10px));
+    transition: opacity 0.15s ease;
+    z-index: 4;
+  }
+
+  .tg-tooltip.is-visible { opacity: 1; }
+  .tg-tooltip strong { font-weight: 700; }
+  .tg-tooltip span { color: var(--text-muted); margin-left: 0.4rem; font-family: var(--font-mono); font-size: 0.72rem; }
+
+  /* ---------- Zoom controls & hint ---------- */
+  .tg-zoom {
+    position: absolute;
+    right: 0.85rem;
+    bottom: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    padding: 3px;
+    gap: 2px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: var(--tg-shadow);
+    z-index: 3;
+    transition: right 0.3s ease;
+  }
+
+  .tg-zoom .tg-btn { min-width: 2rem; height: 2rem; }
+
+  .tg-hint {
+    position: absolute;
+    left: 50%;
+    top: 0.85rem;
+    transform: translate(-50%, -6px);
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    background: var(--text-main);
+    color: var(--bg-color);
+    font-size: 0.78rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 5;
+  }
+
+  .tg-hint.is-visible { opacity: 0.92; transform: translate(-50%, 0); }
+
+  /* ---------- Detail panel ---------- */
+  .tg-panel {
+    position: absolute;
+    top: 0.85rem;
+    right: 0.85rem;
+    bottom: 0.85rem;
+    width: var(--tg-panel-w);
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--tg-shadow);
+    z-index: 7;
+    animation: tg-panel-in 0.22s ease-out;
+  }
+
+  .tg-panel[hidden] { display: none; }
+
+  @keyframes tg-panel-in {
+    from { opacity: 0; transform: translateX(12px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .tg.has-panel .tg-zoom { right: calc(var(--tg-panel-w) + 1.7rem); }
+
+  .tg-panel-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 1rem 0.6rem 0.85rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .tg-panel-dot {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    margin-top: 0.38rem;
+    border-radius: 50%;
+    background: var(--node-color);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--node-color) 22%, transparent);
+  }
+
+  .tg-panel-titles { flex: 1; min-width: 0; }
+
+  .post-content .tg-panel-title {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 1.12rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    text-align: left;
+  }
+
+  .post-content .tg-panel-meta {
+    margin: 0.2rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  .tg-panel-close { flex: none; min-width: 2rem; height: 2rem; }
+
+  .tg-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.4rem 1rem 1rem;
+    overscroll-behavior: contain;
+  }
+
+  .post-content .tg-panel-label {
+    margin: 0.9rem 0 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: left;
+  }
+
+  .tg-posts {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tg-posts li { margin: 0; }
+
+  .post-content .tg-post-link {
+    display: block;
+    margin: 0 -0.5rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    color: var(--text-main);
+    text-decoration: none;
+    transition: background-color var(--transition-speed) ease;
+  }
+
+  .post-content .tg-post-link:hover { background: var(--code-bg); color: var(--text-main); }
+  .post-content .tg-post-link:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: -2px; }
+
+  .tg-post-title { display: block; font-size: 0.9rem; line-height: 1.35; }
+  .tg-post-link:hover .tg-post-title { color: var(--accent-color); }
+  .tg-post-date { display: block; margin-top: 0.15rem; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); }
+
+  /* ---------- Chips (related tags, legend, index) ---------- */
+  .tg-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+
+  .tg-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.28rem 0.6rem 0.28rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: var(--card-bg);
+    color: var(--text-main);
+    font-size: 0.78rem;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: border-color var(--transition-speed) ease, background-color var(--transition-speed) ease, opacity var(--transition-speed) ease;
+  }
+
+  .tg-chip:hover { border-color: var(--node-color, var(--accent-color)); background: color-mix(in srgb, var(--node-color, var(--accent-color)) 9%, var(--card-bg)); }
+  .tg-chip:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 1px; }
+  .tg-chip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--node-color); flex: none; }
+  .tg-chip-count { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted); }
+  .tg-chip[aria-pressed="true"] { border-color: var(--node-color); background: color-mix(in srgb, var(--node-color) 14%, var(--card-bg)); }
+  .tg-legend.has-active .tg-chip[aria-pressed="false"] { opacity: 0.5; }
+
+  /* ---------- Footer ---------- */
+  .tg-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+    padding: 0.7rem 0.85rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--card-bg);
+  }
+
+  .tg-legend { display: flex; flex-wrap: wrap; gap: 0.35rem; flex: 1; min-width: 0; }
+
+  .post-content .tg-help {
+    margin: 0;
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  /* ---------- All-categories index ---------- */
+  .tg-index {
+    margin: 0 0 2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--card-bg);
+  }
+
+  .tg-index summary {
+    padding: 0.85rem 1rem;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 700;
+    list-style-position: inside;
+  }
+
+  .tg-index summary:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 2px; border-radius: 12px; }
+
+  .tg-index-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0 1rem 1rem;
+  }
+
+  /* ---------- Small screens ---------- */
+  @media (max-width: 720px) {
+    .tg {
+      --tg-width: calc(100vw - 2rem);
+      border-radius: 12px;
+    }
+
+    .tg-toolbar { padding: 0.6rem; gap: 0.5rem; }
+    .tg-search { flex: 1 1 auto; }
+    .tg-stats, .tg-kbd, .tg-expand-label { display: none; }
+    .tg-expand { padding: 0; }
+
+    .tg-stage { height: clamp(420px, 64vh, 640px); }
+
+    .tg-panel {
+      top: auto;
+      left: 0.5rem;
+      right: 0.5rem;
+      bottom: 0.5rem;
+      width: auto;
+      max-height: 58%;
+      animation-name: tg-sheet-in;
+    }
+
+    @keyframes tg-sheet-in {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .tg.has-panel .tg-zoom { right: 0.85rem; opacity: 0; pointer-events: none; }
+
+    .tg-footer { flex-direction: column; align-items: stretch; padding: 0.6rem; }
+    .tg-legend { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+    .tg-legend::-webkit-scrollbar { display: none; }
+    .tg-chip { flex: none; }
+    .post-content .tg-help { text-align: left; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tg *, .tg *::before, .tg *::after { transition: none !important; animation: none !important; }
   }
 </style>
 
 <!-- d3 is only needed on this page, so it is loaded here instead of in the site layout. -->
-<script src="https://d3js.org/d3.v7.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js" defer></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // 1. Raw post data generated by Jekyll compile-time
+    if (!window.d3) return;
+
+    // ---------------------------------------------------------------------
+    // 1. Data: posts are rendered by Jekyll at build time
+    // ---------------------------------------------------------------------
     const posts = [
       {% for post in site.posts %}
         {
           title: {{ post.title | jsonify }},
           url: {{ post.url | relative_url | jsonify }},
+          date: {{ post.date | date: "%b %-d, %Y" | jsonify }},
           categories: {{ post.categories | jsonify }}
         }{% unless forloop.last %},{% endunless %}
       {% endfor %}
     ];
 
-    // 2. Build graph data: nodes (unique tags) and links (co-occurrences in the same post)
-    const tagCounts = {};
-    const tagPosts = {};
-    const coOccurrences = {};
+    const tagPosts = new Map();
+    const pairWeights = new Map();
 
     posts.forEach(post => {
-      const tags = post.categories || [];
+      const tags = [...new Set(post.categories || [])];
       tags.forEach(tag => {
-        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-        if (!tagPosts[tag]) {
-          tagPosts[tag] = [];
-        }
-        tagPosts[tag].push(post);
+        if (!tagPosts.has(tag)) tagPosts.set(tag, []);
+        tagPosts.get(tag).push(post);
       });
-
-      // Calculate links between co-occurring tags
       for (let i = 0; i < tags.length; i++) {
         for (let j = i + 1; j < tags.length; j++) {
-          const tagA = tags[i];
-          const tagB = tags[j];
-          // Sort alphabetically to avoid duplicate combinations (e.g. A-B and B-A)
-          const key = tagA < tagB ? `${tagA}|||${tagB}` : `${tagB}|||${tagA}`;
-          coOccurrences[key] = (coOccurrences[key] || 0) + 1;
+          const [a, b] = tags[i] < tags[j] ? [tags[i], tags[j]] : [tags[j], tags[i]];
+          const key = `${a}\u0000${b}`;
+          pairWeights.set(key, (pairWeights.get(key) || 0) + 1);
         }
       }
     });
 
-    const nodes = Object.keys(tagCounts).map(tag => ({
-      id: tag,
-      label: tag,
-      count: tagCounts[tag],
-      posts: tagPosts[tag]
-    }));
-
-    const links = Object.keys(coOccurrences).map(key => {
-      const [source, target] = key.split('|||');
-      return {
-        source,
-        target,
-        value: coOccurrences[key]
-      };
+    const nodes = [...tagPosts.entries()].map(([id, list]) => ({ id, count: list.length, posts: list }));
+    const links = [...pairWeights.entries()].map(([key, value]) => {
+      const [source, target] = key.split('\u0000');
+      return { source, target, value };
     });
 
-    // 3. Setup container and SVG
-    const container = document.getElementById('graph-container');
-    const width = container.clientWidth || 720;
-    const height = 550;
+    if (!nodes.length) return;
 
-    const svg = d3.select('#graph-container')
-      .append('svg')
-      .attr('width', '100%')
-      .attr('height', height)
-      .attr('viewBox', `0 0 ${width} ${height}`);
+    const nodeById = new Map(nodes.map(n => [n.id, n]));
+    const neighbors = new Map(nodes.map(n => [n.id, new Map()]));
+    links.forEach(l => {
+      neighbors.get(l.source).set(l.target, l.value);
+      neighbors.get(l.target).set(l.source, l.value);
+    });
 
-    // Main group inside SVG to hold all elements for zooming
-    const mainGroup = svg.append('g');
+    // ---------------------------------------------------------------------
+    // 2. Topic clusters (one pass of Louvain modularity), used for colour
+    // ---------------------------------------------------------------------
+    function detectClusters() {
+      const ids = nodes.map(n => n.id);
+      const degree = new Map(ids.map(id => [id, [...neighbors.get(id).values()].reduce((s, v) => s + v, 0)]));
+      const total = [...degree.values()].reduce((s, v) => s + v, 0) || 1;
+      const comm = new Map(ids.map(id => [id, id]));
+      const commDegree = new Map(degree);
+      const order = [...nodes].sort((a, b) => b.count - a.count || a.id.localeCompare(b.id)).map(n => n.id);
 
-    // Category colours, tuned to the site accent. Each one clears 3:1 contrast
-    // against both the light (#faf8f4) and dark (#0e0e11) page backgrounds.
-    const colors = [
-      '#b8791f', // amber
-      '#c85f42', // terracotta
-      '#c04a74', // rose
-      '#9070c4', // violet
-      '#4f81ce', // blue
-      '#2f8579', // teal
-      '#6f8c46', // sage
-      '#a8743f', // clay
-      '#71768a'  // slate
-    ];
-
-    function getNodeColor(id) {
-      let hash = 0;
-      for (let i = 0; i < id.length; i++) {
-        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+      for (let pass = 0, moved = true; moved && pass < 25; pass++) {
+        moved = false;
+        order.forEach(id => {
+          const current = comm.get(id);
+          const k = degree.get(id);
+          const weightTo = new Map();
+          neighbors.get(id).forEach((w, other) => {
+            const c = comm.get(other);
+            weightTo.set(c, (weightTo.get(c) || 0) + w);
+          });
+          commDegree.set(current, commDegree.get(current) - k);
+          let best = current;
+          let bestGain = (weightTo.get(current) || 0) - commDegree.get(current) * k / total;
+          weightTo.forEach((w, c) => {
+            const gain = w - commDegree.get(c) * k / total;
+            if (gain > bestGain + 1e-9) { best = c; bestGain = gain; }
+          });
+          commDegree.set(best, commDegree.get(best) + k);
+          if (best !== current) { comm.set(id, best); moved = true; }
+        });
       }
-      const index = Math.abs(hash) % colors.length;
-      return colors[index];
+
+      const groups = new Map();
+      nodes.forEach(n => {
+        const c = comm.get(n.id);
+        if (!groups.has(c)) groups.set(c, []);
+        groups.get(c).push(n);
+      });
+
+      // Fold tiny clusters into the cluster they share the most posts with,
+      // so the legend stays readable and every colour means something.
+      const MIN_SIZE = 3;
+      const small = [...groups.keys()]
+        .filter(c => groups.get(c).length < MIN_SIZE)
+        .sort((a, b) => groups.get(a).length - groups.get(b).length || a.localeCompare(b));
+      small.forEach(c => {
+        const members = groups.get(c);
+        if (!members || groups.size <= 2) return;
+        const pull = new Map();
+        members.forEach(n => neighbors.get(n.id).forEach((w, other) => {
+          const oc = comm.get(other);
+          if (oc !== c) pull.set(oc, (pull.get(oc) || 0) + w);
+        }));
+        let target = null;
+        pull.forEach((w, oc) => {
+          if (target === null || w > pull.get(target) || (w === pull.get(target) && groups.get(oc).length > groups.get(target).length)) target = oc;
+        });
+        if (target === null) return;
+        members.forEach(n => comm.set(n.id, target));
+        groups.get(target).push(...members);
+        groups.delete(c);
+      });
+
+      return [...groups.values()]
+        .map(members => {
+          members.sort((a, b) => b.count - a.count || a.id.localeCompare(b.id));
+          return { members, weight: members.reduce((s, n) => s + n.count, 0) };
+        })
+        .sort((a, b) => b.weight - a.weight || a.members[0].id.localeCompare(b.members[0].id));
     }
 
-    // Zooming behavior with scroll hijacking prevention
-    let zoomHintTimeout;
-    const zoomHint = document.getElementById('zoom-hint');
+    // Each colour clears 3:1 contrast against both page backgrounds (#faf8f4 / #0e0e11).
+    const palette = ['#c85f42', '#4f81ce', '#2f8579', '#9070c4', '#b8791f', '#c04a74', '#6f8c46', '#71768a'];
 
-    const zoom = d3.zoom()
-      .scaleExtent([0.4, 4])
-      .wheelDelta((event) => {
-        // Much smoother zoom speed (20% of default D3 sensitivity)
-        return -event.deltaY * (event.deltaMode === 1 ? 0.01 : 0.0004);
-      })
-      .filter((event) => {
-        // Prevent scroll hijack: allow wheel zoom ONLY when holding Ctrl key
-        if (event.type === 'wheel' && !event.ctrlKey) {
-          if (zoomHint) {
-            zoomHint.style.opacity = '1';
-            clearTimeout(zoomHintTimeout);
-            zoomHintTimeout = setTimeout(() => {
-              zoomHint.style.opacity = '0';
-            }, 1800);
-          }
-          return false; // blocks wheel zoom
-        }
-        return !event.ctrlKey || event.type === 'wheel';
-      })
-      .on('zoom', (event) => {
-        mainGroup.attr('transform', event.transform);
-      });
-
-    svg.call(zoom);
-
-    // Zoom buttons connection
-    d3.select('#zoom-in').on('click', () => {
-      svg.transition().duration(250).call(zoom.scaleBy, 1.3);
+    const clusters = detectClusters();
+    clusters.forEach((cluster, i) => {
+      cluster.index = i;
+      cluster.color = palette[i % palette.length];
+      cluster.name = cluster.members[0].id;
+      cluster.members.forEach(n => { n.cluster = cluster; n.color = cluster.color; });
     });
 
-    d3.select('#zoom-out').on('click', () => {
-      svg.transition().duration(250).call(zoom.scaleBy, 1 / 1.3);
+    // ---------------------------------------------------------------------
+    // 3. Sizing & layout (computed up front so the graph appears settled)
+    // ---------------------------------------------------------------------
+    const maxCount = d3.max(nodes, n => n.count);
+    const radius = d3.scaleSqrt().domain([1, Math.max(2, maxCount)]).range([7, 24]);
+    const majorThreshold = Math.max(2, Math.ceil(maxCount * 0.34));
+
+    const measureCtx = document.createElement('canvas').getContext('2d');
+    nodes.forEach(n => {
+      n.r = radius(n.count);
+      n.major = n.count >= majorThreshold;
+      measureCtx.font = `${n.major ? '700 13px' : '400 12px'} 'Atkinson Hyperlegible', system-ui, sans-serif`;
+      n.labelWidth = measureCtx.measureText(n.id).width;
     });
 
-    d3.select('#zoom-reset').on('click', () => {
-      svg.transition().duration(350).call(
-        zoom.transform,
-        d3.zoomIdentity
-      );
+    // Place cluster anchors on a ring so related topics form visible neighbourhoods.
+    const ringRadius = clusters.length > 1 ? 120 + clusters.length * 22 : 0;
+    clusters.forEach((c, i) => {
+      const angle = (i / clusters.length) * Math.PI * 2 - Math.PI / 2;
+      c.ax = Math.cos(angle) * ringRadius * (i === 0 ? 0.35 : 1);
+      c.ay = Math.sin(angle) * ringRadius * (i === 0 ? 0.35 : 1) * 0.75;
     });
 
-    // 4. Set up physics simulation
+    nodes.forEach((n, i) => {
+      // Deterministic starting positions keep the layout identical on every visit.
+      const a = i * 2.399963;
+      n.x = n.cluster.ax + Math.cos(a) * (20 + i * 3);
+      n.y = n.cluster.ay + Math.sin(a) * (20 + i * 3);
+    });
+
+    const maxWeight = d3.max(links, l => l.value) || 1;
+
     const simulation = d3.forceSimulation(nodes)
-      .force('link', d3.forceLink(links).id(d => d.id).distance(80))
-      .force('charge', d3.forceManyBody().strength(-120))
-      .force('x', d3.forceX(width / 2).strength(0.08))
-      .force('y', d3.forceY(height / 2).strength(0.08))
-      .force('collide', d3.forceCollide().radius(d => {
-        const r = 6 + Math.sqrt(d.count) * 4;
-        return r + 24; // Add spacing to prevent text collision
-      }));
+      .force('link', d3.forceLink(links).id(d => d.id)
+        .distance(l => (l.source.cluster === l.target.cluster ? 70 : 130) + (l.source.r + l.target.r) * 0.6)
+        .strength(l => (l.source.cluster === l.target.cluster ? 0.35 : 0.06) * Math.sqrt(l.value)))
+      .force('charge', d3.forceManyBody().strength(n => -180 - n.r * 12).distanceMax(600))
+      .force('x', d3.forceX(n => n.cluster.ax).strength(0.07))
+      .force('y', d3.forceY(n => n.cluster.ay).strength(0.09))
+      .force('collide', d3.forceCollide(n => Math.max(n.r + 10, Math.min(n.labelWidth / 2 + 6, 70))).strength(0.9).iterations(2))
+      .stop();
 
-    // Draw links/edges
-    const link = mainGroup.append('g')
+    for (let i = 0; i < 400; i++) simulation.tick();
+
+    // ---------------------------------------------------------------------
+    // 4. DOM & SVG
+    // ---------------------------------------------------------------------
+    const root = document.getElementById('tag-graph');
+    const canvas = document.getElementById('tg-canvas');
+    const stage = root.querySelector('.tg-stage');
+    const tooltip = document.getElementById('tg-tooltip');
+    const hint = document.getElementById('tg-hint');
+    const panel = document.getElementById('tg-panel');
+    const searchInput = document.getElementById('tg-search-input');
+    const suggestions = document.getElementById('tg-suggestions');
+    const expandBtn = document.getElementById('tg-expand');
+    const legendEl = document.getElementById('tg-legend');
+
+    const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const duration = ms => (reducedMotion ? 0 : ms);
+    const isNarrow = () => window.matchMedia('(max-width: 720px)').matches;
+
+    document.getElementById('tg-stats').textContent =
+      `${nodes.length} categories · ${posts.length} posts · ${links.length} connections`;
+    const helpEl = document.getElementById('tg-help');
+    function updateHelp(expanded) {
+      helpEl.textContent = coarsePointer
+        ? (expanded ? 'Tap a category to see its posts · Drag to move · Pinch to zoom'
+                    : 'Tap a category to see its posts · Pinch or use two fingers to move')
+        : (expanded ? 'Click a category to see its posts · Drag to pan · Scroll to zoom · Esc to close'
+                    : 'Click a category to see its posts · Drag to pan · Ctrl + scroll to zoom');
+    }
+    updateHelp(false);
+
+    const svg = d3.select(canvas).append('svg')
+      .attr('role', 'img')
+      .attr('aria-label', `Graph of ${nodes.length} blog categories and how they connect`);
+
+    const viewport = svg.append('g');
+
+    const linkSel = viewport.append('g')
+      .attr('aria-hidden', 'true')
       .selectAll('line')
       .data(links)
-      .enter()
-      .append('line')
-      .attr('class', 'graph-link')
-      .attr('stroke-width', d => Math.min(5, 1.5 + (d.value - 1) * 0.8));
+      .join('line')
+      .attr('class', l => `tg-link${l.value > 1 ? ' is-strong' : ''}`)
+      .attr('stroke-width', l => 1 + (l.value - 1) * (3 / Math.max(1, maxWeight - 1 || 1)))
+      .style('--link-color', l => (l.source.cluster === l.target.cluster ? l.source.color : 'var(--text-muted)'));
 
-    // Draw nodes
-    const node = mainGroup.append('g')
+    const nodeSel = viewport.append('g')
       .selectAll('g')
-      .data(nodes)
-      .enter()
-      .append('g')
-      .attr('class', 'graph-node')
-      .call(drag(simulation));
+      .data([...nodes].sort((a, b) => a.count - b.count)) // big tags paint on top
+      .join('g')
+      .attr('class', n => `tg-node ${n.major ? 'is-major' : 'is-minor'}`)
+      .attr('tabindex', 0)
+      .attr('role', 'button')
+      .attr('aria-label', n => `${n.id}: ${n.count} post${n.count === 1 ? '' : 's'}`)
+      .style('--node-color', n => n.color);
 
-    // Append circles for nodes (sized by count and color-coded)
-    const radius = d => 6 + Math.sqrt(d.count) * 4;
-    
-    node.append('circle')
-      .attr('r', radius)
-      .attr('fill', d => getNodeColor(d.id))
-      .attr('stroke', '#ffffff')
-      .attr('stroke-width', '2px');
-
-    // Append text labels for nodes (visible by default with styled opacity)
-    node.append('text')
-      .attr('dy', d => radius(d) + 14)
+    nodeSel.append('circle').attr('class', 'tg-node-halo').attr('r', n => n.r + 7);
+    nodeSel.append('circle').attr('class', 'tg-node-dot').attr('r', n => n.r);
+    nodeSel.append('text')
+      .attr('class', 'tg-node-label')
       .attr('text-anchor', 'middle')
-      .text(d => d.label)
-      .style('opacity', d => d.count > 1 ? 0.8 : 0.45)
-      .style('font-size', '0.7rem')
-      .style('font-weight', '400')
-      .style('fill', 'var(--text-muted)');
+      .attr('dy', n => n.r + 15)
+      .text(n => n.id);
 
-    // 5. Tooltip interaction logic
-    const tooltip = document.getElementById('graph-tooltip');
-    let tooltipTimeout = null;
-    let activeDraggedNode = null;
-    let hoveredNode = null;
+    function renderPositions() {
+      linkSel
+        .attr('x1', l => l.source.x).attr('y1', l => l.source.y)
+        .attr('x2', l => l.target.x).attr('y2', l => l.target.y);
+      nodeSel.attr('transform', n => `translate(${n.x},${n.y})`);
+    }
 
-    function showTooltip(d, event) {
-      clearTimeout(tooltipTimeout);
+    // The layout is landscape; on a portrait stage (phones) turn it 90° so it fills the space.
+    let portrait = false;
+    function matchOrientation() {
+      const wantPortrait = stage.clientHeight > stage.clientWidth * 1.1;
+      if (wantPortrait === portrait) return false;
+      portrait = wantPortrait;
+      nodes.forEach(n => { [n.x, n.y] = [-n.y, n.x]; });
+      clusters.forEach(c => { [c.ax, c.ay] = [-c.ay, c.ax]; });
+      simulation.force('x').x(n => n.cluster.ax);
+      simulation.force('y').y(n => n.cluster.ay);
+      return true;
+    }
 
-      let html = `<div class="graph-tooltip-title">${d.id}</div>`;
-      html += `<ul class="graph-tooltip-list">`;
-      d.posts.forEach(post => {
-        html += `
-          <li class="graph-tooltip-item">
-            <a class="graph-tooltip-link" href="${post.url}">${post.title}</a>
-          </li>`;
+    matchOrientation();
+    renderPositions();
+    simulation.on('tick', renderPositions);
+
+    // Gentle entrance
+    if (!reducedMotion) {
+      nodeSel.style('opacity', 0)
+        .transition().delay((n, i) => 120 + i * 18).duration(380).style('opacity', 1);
+      linkSel.style('opacity', 0)
+        .transition().delay(260).duration(600).style('opacity', null);
+    }
+
+    // ---------------------------------------------------------------------
+    // 5. Zoom & pan
+    // ---------------------------------------------------------------------
+    let userMovedView = false;
+    let hintTimer = null;
+
+    function flashHint(text) {
+      hint.textContent = text;
+      hint.classList.add('is-visible');
+      clearTimeout(hintTimer);
+      hintTimer = setTimeout(() => hint.classList.remove('is-visible'), 1600);
+    }
+
+    const zoom = d3.zoom()
+      .scaleExtent([0.25, 4])
+      .filter(event => {
+        const expanded = root.classList.contains('is-expanded');
+        if (event.type === 'wheel') {
+          // Don't hijack page scrolling: plain wheel zooms only in full-screen mode.
+          if (expanded || event.ctrlKey || event.metaKey) return true;
+          flashHint(navigator.platform.includes('Mac') ? 'Hold ⌘ and scroll to zoom' : 'Hold Ctrl and scroll to zoom');
+          return false;
+        }
+        if (event.type === 'touchstart' && !expanded && event.touches.length < 2) return false;
+        return !event.button;
+      })
+      .wheelDelta(event => -event.deltaY * (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 0.002))
+      .on('start', event => { if (event.sourceEvent) userMovedView = true; })
+      .on('zoom', event => {
+        viewport.attr('transform', event.transform);
+        canvas.classList.toggle('is-far', event.transform.k < 0.7);
+        hideTooltip();
       });
-      html += `</ul>`;
 
-      tooltip.innerHTML = html;
-      tooltip.style.opacity = 1;
-      tooltip.style.pointerEvents = 'auto'; // allow mouse interaction with links
+    svg.call(zoom).on('dblclick.zoom', null);
 
-      const wrapperRect = document.querySelector('.graph-wrapper').getBoundingClientRect();
-      
-      let clientX, clientY;
-      if (event && event.clientX !== undefined) {
-        clientX = event.clientX;
-        clientY = event.clientY;
-      } else {
-        // Fallback positioning relative to current zoom coordinates
-        const transform = d3.zoomTransform(svg.node());
-        clientX = wrapperRect.left + (d.x * transform.k + transform.x);
-        clientY = wrapperRect.top + (d.y * transform.k + transform.y);
+    // One finger scrolls the page; two fingers move the graph (one finger in full screen).
+    function applyTouchAction() {
+      svg.style('touch-action', root.classList.contains('is-expanded') ? 'none' : 'pan-y');
+    }
+    applyTouchAction();
+
+    svg.on('touchstart.hint', event => {
+      if (!root.classList.contains('is-expanded') && event.touches.length === 1 && !event.target.closest('.tg-node')) {
+        flashHint('Use two fingers to move the graph');
       }
+    }, { passive: true });
 
-      let x = clientX - wrapperRect.left + 15;
-      let y = clientY - wrapperRect.top - 15;
+    function stageSize() {
+      return { w: stage.clientWidth, h: stage.clientHeight };
+    }
 
-      const tooltipWidth = 260;
-      if (x + tooltipWidth > wrapperRect.width) {
-        x = clientX - wrapperRect.left - tooltipWidth - 15;
+    // The area of the stage not covered by the detail panel.
+    function visibleArea() {
+      const { w, h } = stageSize();
+      if (panel.hidden) return { x: 0, y: 0, w, h };
+      if (isNarrow()) return { x: 0, y: 0, w, h: h - panel.offsetHeight - 8 };
+      return { x: 0, y: 0, w: w - panel.offsetWidth - 14, h };
+    }
+
+    function fitTransform(subset = nodes, padding = isNarrow() ? 14 : 48) {
+      const area = visibleArea();
+      const [x0, x1] = d3.extent(subset.flatMap(n => [n.x - Math.max(n.r, n.labelWidth / 2), n.x + Math.max(n.r, n.labelWidth / 2)]));
+      const [y0, y1] = d3.extent(subset.flatMap(n => [n.y - n.r, n.y + n.r + 20]));
+      const bw = Math.max(1, x1 - x0);
+      const bh = Math.max(1, y1 - y0);
+      const k = Math.max(0.25, Math.min(subset.length === 1 ? 1.6 : 1.5, Math.min((area.w - padding * 2) / bw, (area.h - padding * 2) / bh)));
+      const tx = area.x + area.w / 2 - k * (x0 + bw / 2);
+      const ty = area.y + area.h / 2 - k * (y0 + bh / 2);
+      return d3.zoomIdentity.translate(tx, ty).scale(k);
+    }
+
+    function fitView(animate = true, subset) {
+      const t = fitTransform(subset);
+      (animate ? svg.transition().duration(duration(600)).ease(d3.easeCubicInOut) : svg).call(zoom.transform, t);
+    }
+
+    function centerOn(n, minScale = 1.2) {
+      const area = visibleArea();
+      const current = d3.zoomTransform(svg.node());
+      const k = Math.max(current.k, minScale);
+      const t = d3.zoomIdentity.translate(area.x + area.w / 2 - n.x * k, area.y + area.h / 2 - n.y * k).scale(k);
+      svg.transition().duration(duration(650)).ease(d3.easeCubicInOut).call(zoom.transform, t);
+    }
+
+    function isInView(n) {
+      const t = d3.zoomTransform(svg.node());
+      const area = visibleArea();
+      const [sx, sy] = t.apply([n.x, n.y]);
+      const m = 24;
+      return sx > area.x + m && sx < area.x + area.w - m && sy > area.y + m && sy < area.y + area.h - m;
+    }
+
+    document.getElementById('tg-zoom-in').addEventListener('click', () => {
+      userMovedView = true;
+      svg.transition().duration(duration(250)).call(zoom.scaleBy, 1.35);
+    });
+    document.getElementById('tg-zoom-out').addEventListener('click', () => {
+      userMovedView = true;
+      svg.transition().duration(duration(250)).call(zoom.scaleBy, 1 / 1.35);
+    });
+    document.getElementById('tg-zoom-fit').addEventListener('click', () => {
+      userMovedView = false;
+      fitView(true);
+    });
+
+    fitView(false);
+
+    let lastSize = stageSize();
+    new ResizeObserver(() => {
+      const size = stageSize();
+      if (size.w === lastSize.w && size.h === lastSize.h) return;
+      lastSize = size;
+      if (matchOrientation()) {
+        renderPositions();
+        userMovedView = false;
       }
+      if (!userMovedView) fitView(false);
+    }).observe(stage);
 
-      tooltip.style.left = `${x}px`;
-      tooltip.style.top = `${y}px`;
+    // ---------------------------------------------------------------------
+    // 6. Highlight state
+    // ---------------------------------------------------------------------
+    const state = { hovered: null, selected: null, cluster: null, query: '' };
+
+    function matchesQuery(n) {
+      return state.query && n.id.toLowerCase().includes(state.query);
+    }
+
+    function applyState() {
+      const focus = state.hovered || state.selected;
+      const near = focus ? neighbors.get(focus.id) : null;
+      const anyMatch = state.query && nodes.some(matchesQuery);
+
+      nodeSel
+        .classed('is-focus', n => n === focus || n === state.selected)
+        .classed('is-neighbor', n => !!near && near.has(n.id))
+        .classed('is-match', n => !focus && matchesQuery(n))
+        .classed('is-dim', n => {
+          if (focus) return n !== focus && n !== state.selected && !near.has(n.id);
+          if (anyMatch) return !matchesQuery(n);
+          if (state.cluster) return n.cluster !== state.cluster;
+          return false;
+        });
+
+      linkSel
+        .classed('is-active', l => !!focus && (l.source === focus || l.target === focus))
+        .classed('is-dim', l => {
+          if (focus) return l.source !== focus && l.target !== focus;
+          if (anyMatch) return true;
+          if (state.cluster) return l.source.cluster !== state.cluster || l.target.cluster !== state.cluster;
+          return false;
+        })
+        .style('--link-color', l => (focus ? focus.color : l.source.color));
+    }
+
+    // ---------------------------------------------------------------------
+    // 7. Tooltip (hover, desktop)
+    // ---------------------------------------------------------------------
+    function showTooltip(n) {
+      const t = d3.zoomTransform(svg.node());
+      const [sx, sy] = t.apply([n.x, n.y - n.r]);
+      const related = neighbors.get(n.id).size;
+      tooltip.innerHTML = '';
+      const name = document.createElement('strong');
+      name.textContent = n.id;
+      const meta = document.createElement('span');
+      meta.textContent = `${n.count} post${n.count === 1 ? '' : 's'} · ${related} related`;
+      tooltip.append(name, meta);
+      tooltip.style.left = `${sx}px`;
+      tooltip.style.top = `${sy}px`;
+      tooltip.classList.add('is-visible');
     }
 
     function hideTooltip() {
-      tooltipTimeout = setTimeout(() => {
-        tooltip.style.opacity = 0;
-        tooltip.style.pointerEvents = 'none';
-      }, 300);
+      tooltip.classList.remove('is-visible');
     }
 
-    tooltip.addEventListener('mouseenter', () => {
-      clearTimeout(tooltipTimeout);
-      tooltip.style.opacity = 1;
-      tooltip.style.pointerEvents = 'auto';
-    });
+    // ---------------------------------------------------------------------
+    // 8. Detail panel & selection
+    // ---------------------------------------------------------------------
+    const panelTitle = document.getElementById('tg-panel-title');
+    const panelMeta = document.getElementById('tg-panel-meta');
+    const panelPosts = document.getElementById('tg-panel-posts');
+    const panelRelated = document.getElementById('tg-panel-related');
+    const relatedLabel = document.getElementById('tg-related-label');
 
-    tooltip.addEventListener('mouseleave', () => {
-      hideTooltip();
-    });
+    function makeChip(n, { count, onClick, pressed } = {}) {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'tg-chip';
+      chip.style.setProperty('--node-color', n.color);
+      if (pressed !== undefined) chip.setAttribute('aria-pressed', String(pressed));
+      const dot = document.createElement('span');
+      dot.className = 'tg-chip-dot';
+      const label = document.createElement('span');
+      label.textContent = n.label || n.id;
+      chip.append(dot, label);
+      if (count !== undefined) {
+        const c = document.createElement('span');
+        c.className = 'tg-chip-count';
+        c.textContent = count;
+        chip.append(c);
+      }
+      chip.addEventListener('click', onClick);
+      return chip;
+    }
 
-    // Node mouse hover interactivity
-    node.on('mouseover', function(event, d) {
-      hoveredNode = d;
+    function renderPanel(n) {
+      panel.style.setProperty('--node-color', n.color);
+      panelTitle.textContent = n.id;
+      const related = [...neighbors.get(n.id).entries()]
+        .map(([id, w]) => ({ node: nodeById.get(id), w }))
+        .sort((a, b) => b.w - a.w || b.node.count - a.node.count || a.node.id.localeCompare(b.node.id));
+      panelMeta.textContent = `${n.count} post${n.count === 1 ? '' : 's'} · ${related.length} related · ${n.cluster.name} cluster`;
 
-      // Find connected tags to display their labels as well
-      const connectedTagIds = new Set();
-      links.forEach(l => {
-        if (l.source.id === d.id) connectedTagIds.add(l.target.id);
-        if (l.target.id === d.id) connectedTagIds.add(l.source.id);
+      panelPosts.innerHTML = '';
+      n.posts.forEach(post => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.className = 'tg-post-link';
+        a.href = post.url;
+        const title = document.createElement('span');
+        title.className = 'tg-post-title';
+        title.textContent = post.title;
+        const date = document.createElement('span');
+        date.className = 'tg-post-date';
+        date.textContent = post.date;
+        a.append(title, date);
+        li.append(a);
+        panelPosts.append(li);
       });
 
-      // Highlight connections: active ones color-coded, others faded
-      const activeColor = getNodeColor(d.id);
-      link
-        .attr('stroke', l => (l.source.id === d.id || l.target.id === d.id) ? activeColor : 'rgba(31, 35, 40, 0.03)')
-        .attr('stroke-opacity', l => (l.source.id === d.id || l.target.id === d.id) ? 0.8 : 0.05);
-
-      // Fade other circles, keep active circle highlighted
-      node.select('circle')
-        .attr('fill', n => n.id === d.id ? getNodeColor(n.id) : (connectedTagIds.has(n.id) ? getNodeColor(n.id) : '#cbd5e1'))
-        .style('opacity', n => n.id === d.id ? 1 : (connectedTagIds.has(n.id) ? 0.9 : 0.15))
-        .attr('stroke-width', n => n.id === d.id ? '3px' : '1.5px');
-
-      // Update text labels style and opacity
-      node.select('text')
-        .style('opacity', n => {
-          if (n.id === d.id) return 1;          // hovered tag fully visible
-          if (connectedTagIds.has(n.id)) return 0.75; // neighboring tags semi-visible
-          return 0.05;                             // others faded out
-        })
-        .style('font-size', n => n.id === d.id ? '0.82rem' : '0.72rem')
-        .style('font-weight', n => n.id === d.id ? '600' : '400')
-        .style('fill', n => n.id === d.id ? 'var(--text-main)' : 'var(--text-muted)');
-
-      showTooltip(d, event);
-    })
-    .on('mouseout', function(event, d) {
-      hoveredNode = null;
-
-      // Don't restore if this node is currently being dragged
-      if (activeDraggedNode === d) return;
-
-      // Restore node circle
-      node.select('circle')
-        .attr('fill', n => getNodeColor(n.id))
-        .style('opacity', 1)
-        .attr('stroke-width', '2px');
-
-      // Restore connections
-      link
-        .attr('stroke', 'rgba(31, 35, 40, 0.08)')
-        .attr('stroke-opacity', 0.5);
-
-      // Restore all labels
-      node.select('text')
-        .style('opacity', n => n.count > 1 ? 0.8 : 0.45)
-        .style('font-size', '0.7rem')
-        .style('font-weight', '400')
-        .style('fill', 'var(--text-muted)');
-
-      hideTooltip();
-    });
-
-    // Update coordinates during force simulation ticks
-    simulation.on('tick', () => {
-      // Keep nodes within the boundary limits of the SVG container
-      nodes.forEach(d => {
-        const r = 6 + Math.sqrt(d.count) * 4;
-        const padX = 65; // margin for text label horizontally
-        const padYBottom = 30; // margin for text label vertically (bottom)
-        const padYTop = 15;
-        
-        d.x = Math.max(padX, Math.min(width - padX, d.x));
-        d.y = Math.max(padYTop, Math.min(height - padYBottom, d.y));
+      panelRelated.innerHTML = '';
+      relatedLabel.hidden = related.length === 0;
+      related.forEach(({ node, w }) => {
+        panelRelated.append(makeChip(node, {
+          count: w > 1 ? `×${w}` : undefined,
+          onClick: () => select(node, { recenter: true })
+        }));
       });
+      panel.querySelector('.tg-panel-body').scrollTop = 0;
+    }
 
-      link
-        .attr('x1', d => d.source.x)
-        .attr('y1', d => d.source.y)
-        .attr('x2', d => d.target.x)
-        .attr('y2', d => d.target.y);
+    function updateHash(n) {
+      const url = new URL(window.location.href);
+      url.hash = n ? `tag=${encodeURIComponent(n.id)}` : '';
+      history.replaceState(null, '', n ? url.href : url.pathname + url.search);
+    }
 
-      node.attr('transform', d => `translate(${d.x}, ${d.y})`);
-    });
-
-    // 6. Node Dragging physics behavior implementation
-    function drag(sim) {
-      function dragstarted(event, d) {
-        if (!event.active) sim.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
-        activeDraggedNode = d;
-
-        node.select('circle')
-          .style('opacity', n => n.id === d.id ? 1 : 0.15);
-        
-        node.select('text')
-          .style('opacity', n => n.id === d.id ? 1 : 0.05);
+    function select(n, { recenter = false } = {}) {
+      state.selected = n;
+      state.cluster = null;
+      syncLegend();
+      if (!n) {
+        panel.hidden = true;
+        root.classList.remove('has-panel');
+        updateHash(null);
+        applyState();
+        return;
       }
-
-      function dragged(event, d) {
-        d.fx = event.x;
-        d.fy = event.y;
+      renderPanel(n);
+      panel.hidden = false;
+      root.classList.add('has-panel');
+      updateHash(n);
+      applyState();
+      // Keep the tag and all its neighbours visible beside the panel.
+      const hood = [n, ...[...neighbors.get(n.id).keys()].map(id => nodeById.get(id))];
+      if (recenter || !hood.every(isInView)) {
+        userMovedView = true;
+        fitView(true, hood);
       }
+    }
 
-      function dragended(event, d) {
-        if (!event.active) sim.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-        activeDraggedNode = null;
+    document.getElementById('tg-panel-close').addEventListener('click', () => select(null));
 
-        // If the mouse is no longer hovering over this node, reset its visual state
-        if (hoveredNode !== d) {
-          node.select('circle')
-            .attr('fill', n => getNodeColor(n.id))
-            .style('opacity', 1)
-            .attr('stroke-width', '2px');
+    // ---------------------------------------------------------------------
+    // 9. Node interaction: hover, click, drag, keyboard
+    // ---------------------------------------------------------------------
+    let dragging = false;
 
-          link
-            .attr('stroke', 'rgba(31, 35, 40, 0.08)')
-            .attr('stroke-opacity', 0.5);
-
-          node.select('text')
-            .style('opacity', n => n.count > 1 ? 0.8 : 0.45)
-            .style('font-size', '0.7rem')
-            .style('font-weight', '400')
-            .style('fill', 'var(--text-muted)');
+    nodeSel
+      .on('pointerenter', (event, n) => {
+        if (dragging || event.pointerType === 'touch') return;
+        state.hovered = n;
+        applyState();
+        showTooltip(n);
+      })
+      .on('pointerleave', () => {
+        if (dragging) return;
+        state.hovered = null;
+        applyState();
+        hideTooltip();
+      })
+      .on('click', (event, n) => {
+        event.stopPropagation();
+        hideTooltip();
+        select(state.selected === n ? null : n);
+      })
+      .on('focus', (event, n) => {
+        state.hovered = n;
+        applyState();
+        showTooltip(n);
+      })
+      .on('blur', () => {
+        state.hovered = null;
+        applyState();
+        hideTooltip();
+      })
+      .on('keydown', (event, n) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          select(n);
         }
-      }
-
-      return d3.drag()
-        .on('start', dragstarted)
-        .on('drag', dragged)
-        .on('end', dragended);
-    }
-
-    // 7. Search autocomplete & Focus implementation
-    const searchInput = document.getElementById('graph-search');
-    const suggestionsBox = document.getElementById('search-suggestions');
-    const allTags = nodes.map(n => n.id).sort();
-
-    searchInput.addEventListener('input', () => {
-      const val = searchInput.value.toLowerCase().trim();
-      suggestionsBox.innerHTML = '';
-      if (!val) {
-        suggestionsBox.style.display = 'none';
-        return;
-      }
-
-      const matches = allTags.filter(tag => tag.toLowerCase().includes(val));
-      if (matches.length === 0) {
-        suggestionsBox.style.display = 'none';
-        return;
-      }
-
-      matches.forEach(match => {
-        const item = document.createElement('div');
-        item.className = 'suggestion-item';
-        item.textContent = match;
-        item.addEventListener('click', () => {
-          searchInput.value = match;
-          suggestionsBox.style.display = 'none';
-          focusOnNode(match);
-        });
-        suggestionsBox.appendChild(item);
       });
-      suggestionsBox.style.display = 'block';
+
+    nodeSel.call(d3.drag()
+      .clickDistance(4)
+      .on('start', (event, n) => {
+        dragging = true;
+        hideTooltip();
+        if (!event.active) simulation.alphaTarget(0.12).restart();
+        n.fx = n.x;
+        n.fy = n.y;
+      })
+      .on('drag', (event, n) => {
+        n.fx = event.x;
+        n.fy = event.y;
+      })
+      .on('end', (event, n) => {
+        dragging = false;
+        if (!event.active) simulation.alphaTarget(0);
+        n.fx = null;
+        n.fy = null;
+      }));
+
+    // Clicking empty canvas clears the selection.
+    svg.on('click', event => {
+      if (!event.target.closest('.tg-node')) select(null);
     });
 
-    document.addEventListener('click', (e) => {
-      if (e.target !== searchInput) {
-        suggestionsBox.style.display = 'none';
+    // ---------------------------------------------------------------------
+    // 10. Legend (clusters)
+    // ---------------------------------------------------------------------
+    const legendChips = clusters.map(cluster => {
+      const chip = makeChip({ id: cluster.name, color: cluster.color }, {
+        count: cluster.members.length,
+        pressed: false,
+        onClick: () => {
+          const next = state.cluster === cluster ? null : cluster;
+          if (state.selected) select(null);
+          state.cluster = next;
+          syncLegend();
+          applyState();
+          if (next) {
+            userMovedView = true;
+            fitView(true, next.members);
+          }
+        }
+      });
+      chip.title = `${cluster.members.map(m => m.id).join(', ')}`;
+      chip.addEventListener('pointerenter', () => {
+        if (state.selected || state.cluster) return;
+        state.cluster = cluster;
+        applyState();
+        state.cluster = null;
+      });
+      chip.addEventListener('pointerleave', () => applyState());
+      legendEl.append(chip);
+      return { cluster, chip };
+    });
+
+    function syncLegend() {
+      legendChips.forEach(({ cluster, chip }) => chip.setAttribute('aria-pressed', String(state.cluster === cluster)));
+      legendEl.classList.toggle('has-active', !!state.cluster);
+    }
+
+    // ---------------------------------------------------------------------
+    // 11. Search with keyboard navigation
+    // ---------------------------------------------------------------------
+    const sortedNodes = [...nodes].sort((a, b) => a.id.localeCompare(b.id));
+    let results = [];
+    let activeIndex = 0;
+
+    function highlightMatch(text, query) {
+      const frag = document.createDocumentFragment();
+      const i = text.toLowerCase().indexOf(query);
+      if (i < 0) { frag.append(text); return frag; }
+      const mark = document.createElement('mark');
+      mark.textContent = text.slice(i, i + query.length);
+      frag.append(text.slice(0, i), mark, text.slice(i + query.length));
+      return frag;
+    }
+
+    function renderSuggestions() {
+      const q = searchInput.value.trim().toLowerCase();
+      state.query = q;
+      applyState();
+      suggestions.innerHTML = '';
+      if (!q) {
+        suggestions.hidden = true;
+        searchInput.setAttribute('aria-expanded', 'false');
+        return;
+      }
+      results = sortedNodes
+        .filter(n => n.id.toLowerCase().includes(q))
+        .sort((a, b) => (b.id.toLowerCase().startsWith(q) - a.id.toLowerCase().startsWith(q)) || b.count - a.count);
+      activeIndex = 0;
+
+      if (!results.length) {
+        const empty = document.createElement('li');
+        empty.className = 'tg-suggestion-empty';
+        empty.textContent = 'No matching category';
+        suggestions.append(empty);
+      }
+
+      results.forEach((n, i) => {
+        const li = document.createElement('li');
+        li.className = 'tg-suggestion';
+        li.id = `tg-opt-${i}`;
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', String(i === activeIndex));
+        const dot = document.createElement('span');
+        dot.className = 'tg-chip-dot';
+        dot.style.setProperty('--node-color', n.color);
+        const label = document.createElement('span');
+        label.append(highlightMatch(n.id, q));
+        const count = document.createElement('span');
+        count.className = 'tg-suggestion-count';
+        count.textContent = n.count;
+        li.append(dot, label, count);
+        li.addEventListener('pointerdown', e => e.preventDefault());
+        li.addEventListener('click', () => choose(n));
+        suggestions.append(li);
+      });
+
+      suggestions.hidden = false;
+      searchInput.setAttribute('aria-expanded', 'true');
+      searchInput.setAttribute('aria-activedescendant', results.length ? 'tg-opt-0' : '');
+    }
+
+    function moveActive(delta) {
+      if (!results.length) return;
+      activeIndex = (activeIndex + delta + results.length) % results.length;
+      [...suggestions.children].forEach((li, i) => li.setAttribute('aria-selected', String(i === activeIndex)));
+      const active = suggestions.children[activeIndex];
+      active.scrollIntoView({ block: 'nearest' });
+      searchInput.setAttribute('aria-activedescendant', active.id);
+    }
+
+    function closeSuggestions() {
+      suggestions.hidden = true;
+      searchInput.setAttribute('aria-expanded', 'false');
+    }
+
+    function choose(n) {
+      searchInput.value = '';
+      state.query = '';
+      closeSuggestions();
+      searchInput.blur();
+      select(n, { recenter: true });
+    }
+
+    searchInput.addEventListener('input', renderSuggestions);
+    searchInput.addEventListener('focus', () => { if (searchInput.value) renderSuggestions(); });
+    searchInput.addEventListener('blur', () => setTimeout(closeSuggestions, 120));
+    searchInput.addEventListener('keydown', event => {
+      if (event.key === 'ArrowDown') { event.preventDefault(); moveActive(1); }
+      else if (event.key === 'ArrowUp') { event.preventDefault(); moveActive(-1); }
+      else if (event.key === 'Enter') {
+        event.preventDefault();
+        if (results[activeIndex]) choose(results[activeIndex]);
+      } else if (event.key === 'Escape') {
+        event.stopPropagation();
+        searchInput.value = '';
+        renderSuggestions();
+        searchInput.blur();
       }
     });
 
-    function focusOnNode(nodeId) {
-      const targetNode = nodes.find(n => n.id === nodeId);
-      if (!targetNode) return;
-
-      const scale = 1.6;
-      const x = width / 2 - targetNode.x * scale;
-      const y = height / 2 - targetNode.y * scale;
-
-      const transform = d3.zoomIdentity
-        .translate(x, y)
-        .scale(scale);
-
-      svg.transition()
-        .duration(850)
-        .call(zoom.transform, transform)
-        .on('end', () => {
-          const nodeSelection = node.filter(n => n.id === nodeId);
-          if (nodeSelection.node()) {
-            const rect = nodeSelection.node().getBoundingClientRect();
-            const wrapperRect = document.querySelector('.graph-wrapper').getBoundingClientRect();
-            
-            const fakeEvent = {
-              clientX: rect.left + rect.width / 2,
-              clientY: rect.top + rect.height / 2
-            };
-            
-            nodeSelection.dispatch('mouseover', {
-              detail: { event: fakeEvent, data: targetNode }
-            });
-            
-            showTooltip(targetNode, fakeEvent);
-          }
-        });
+    // ---------------------------------------------------------------------
+    // 12. Full screen
+    // ---------------------------------------------------------------------
+    function setExpanded(on) {
+      root.classList.toggle('is-expanded', on);
+      expandBtn.setAttribute('aria-pressed', String(on));
+      expandBtn.querySelector('.tg-expand-label').textContent = on ? 'Close' : 'Expand';
+      expandBtn.title = on ? 'Exit full screen (Esc)' : 'Full screen (F)';
+      document.documentElement.style.overflow = on ? 'hidden' : '';
+      applyTouchAction();
+      updateHelp(on);
+      userMovedView = false;
+      requestAnimationFrame(() => {
+        if (state.selected) centerOn(state.selected, d3.zoomTransform(svg.node()).k);
+        else fitView(true);
+      });
     }
+
+    expandBtn.addEventListener('click', () => setExpanded(!root.classList.contains('is-expanded')));
+
+    // ---------------------------------------------------------------------
+    // 13. Keyboard shortcuts
+    // ---------------------------------------------------------------------
+    document.addEventListener('keydown', event => {
+      const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName) || event.target.isContentEditable;
+      if (event.key === 'Escape') {
+        if (state.selected) select(null);
+        else if (state.cluster) { state.cluster = null; syncLegend(); applyState(); }
+        else if (root.classList.contains('is-expanded')) setExpanded(false);
+        return;
+      }
+      if (typing || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.key === '/') { event.preventDefault(); searchInput.focus(); }
+      else if (event.key === 'f' || event.key === 'F') setExpanded(!root.classList.contains('is-expanded'));
+      else if (event.key === '0') { userMovedView = false; fitView(true); }
+      else if (event.key === '+' || event.key === '=') svg.transition().duration(duration(250)).call(zoom.scaleBy, 1.35);
+      else if (event.key === '-' || event.key === '_') svg.transition().duration(duration(250)).call(zoom.scaleBy, 1 / 1.35);
+    });
+
+    // ---------------------------------------------------------------------
+    // 14. Accessible index of every category
+    // ---------------------------------------------------------------------
+    const indexEl = document.getElementById('tg-index');
+    [...nodes].sort((a, b) => b.count - a.count || a.id.localeCompare(b.id)).forEach(n => {
+      indexEl.append(makeChip(n, {
+        count: n.count,
+        onClick: () => {
+          root.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' });
+          select(n, { recenter: true });
+        }
+      }));
+    });
+
+    // ---------------------------------------------------------------------
+    // 15. Deep link: /graph/#tag=Name
+    // ---------------------------------------------------------------------
+    function selectFromHash() {
+      const m = window.location.hash.match(/^#tag=(.+)$/);
+      if (!m) return;
+      const n = nodeById.get(decodeURIComponent(m[1]));
+      if (n) select(n, { recenter: true });
+    }
+
+    selectFromHash();
+    window.addEventListener('hashchange', selectFromHash);
   });
 </script>
