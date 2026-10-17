@@ -55,9 +55,12 @@ title: Home
 
 <section class="home-intro">
   <p class="home-standfirst">
-    Welcome to my Mind Palace. Here, I dive deep into the design, code, and thinking behind everything I build. Take a
+    Welcome to my <strong>Mind Palace</strong>. Here, I dive deep into the design, code, and thinking behind everything I build. Take a
     look inside to see how I'm experimenting with AI for humanity.
   </p>
+  <div class="home-intro-art" aria-hidden="true">
+    <img src="{{ '/assets/images/hero-doorway.jpg' | relative_url }}" alt="" width="600" height="450" decoding="async" fetchpriority="high">
+  </div>
 </section>
 
 <!-- Posts List Section -->
@@ -152,7 +155,7 @@ title: Home
           </span>
           {% if has_audio %}
           <span>•</span>
-          <span class="audio-badge" title="Audio version available" style="display: inline-flex; align-items: center; gap: 3px; font-weight: 500; color: var(--accent-color);">
+          <span class="audio-badge" title="Audio version available">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
               <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
             </svg>
@@ -178,16 +181,16 @@ title: Home
           <span class="post-category-tag">{{ category | escape }}</span>
           {% endfor %}
           {% if post.categories.size > 3 %}
-          <span class="post-category-tag" title="{{ post.categories | offset:3 | join: ', ' }}" style="opacity: 0.7;">+{{ post.categories.size | minus: 3 }}</span>
+          <span class="post-category-tag" title="{{ post.categories | offset:3 | join: ', ' }}" data-more="true">+{{ post.categories.size | minus: 3 }}</span>
           {% endif %}
         </div>
         {% endif %}
 
         <!-- Actions -->
-        <div class="post-item-actions" style="display: flex; align-items: center; gap: 1.25rem;">
+        <div class="post-item-actions">
           <a class="read-more-link" href="{{ post.url | relative_url }}">Read Article</a>
           {% if has_audio %}
-          <a class="listen-audio-link" href="{{ post.url | relative_url }}#tts-audio" style="font-size: 0.85rem; color: var(--accent-color); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; transition: opacity var(--transition-speed);" title="Listen to Audio Version">
+          <a class="listen-audio-link" href="{{ post.url | relative_url }}#tts-audio" title="Listen to Audio Version">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
               <path d="M8 5v14l11-7z"/>
             </svg>
@@ -339,7 +342,7 @@ title: Home
         const numDays = Math.round((endDate - startDate) / (24 * 60 * 60 * 1000)) + 1;
         const numWeeks = numDays / 7;
 
-        calendarBoard.style.gridTemplateColumns = `auto repeat(${numWeeks}, 9px)`;
+        calendarBoard.style.gridTemplateColumns = `auto repeat(${numWeeks}, 10px)`;
 
         // Generate list of dates
         const cells = [];
