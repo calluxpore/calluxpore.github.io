@@ -43,7 +43,7 @@ title: Home
           <li>
             <a class="post-index-link" href="#post-{{ index_slug }}" data-target="post-{{ index_slug }}">
               <span class="post-index-title">{{ post.title | escape }}</span>
-              <time class="post-index-date" datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%-d" }}</time>
+              <time class="post-index-date" datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d" }}</time>
             </a>
           </li>
       {% if forloop.last %}</ol></div>{% endif %}
