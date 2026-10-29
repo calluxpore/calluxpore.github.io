@@ -1,0 +1,517 @@
+import os
+import datetime
+import frontmatter
+import re
+import shutil
+import sys
+import io
+import asyncio
+import edge_tts
+
+# Pillow is optional. Without it the pipeline still publishes; images are just
+# copied at their original size, exactly as before.
+try:
+    from PIL import Image
+    PILLOW_AVAILABLE = True
+except ImportError:
+    PILLOW_AVAILABLE = False
+    print("i Pillow not installed - images will be copied without optimisation. (pip install Pillow)")
+
+# Set encoding for standard streams to UTF-8 to prevent encoding crashes on Windows console
+if sys.platform.startswith('win'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
+# --- CONFIGURATION PATHS ---
+def _resolve_vault_path(subpath: str) -> str:
+    for drive in ["D:", "E:", "C:"]:
+        candidate = os.path.join(f"{drive}\\", "Vault", "Sammy.Decimal", subpath)
+        if os.path.exists(candidate):
+            return candidate
+    return os.path.join(r"D:\Vault\Sammy.Decimal", subpath)
+
+OBSIDIAN_POSTS_DIR = _resolve_vault_path(r"80-89 🦋 Documents\86 Writing")
+OBSIDIAN_IMAGES_DIR = _resolve_vault_path(r"90-99 🐙 Archives\98 Digital Archives")
+JEKYLL_POSTS_DIR = "./_posts" 
+JEKYLL_IMAGES_DIR = "./_assets/images"
+JEKYLL_TTS_DIR = "./_assets/TTS"
+JEKYLL_THUMBS_DIR = "./_assets/images/thumbs"
+DEFAULT_TTS_VOICE = "en-US-AvaNeural"
+
+# Image optimisation settings
+MAX_IMAGE_EDGE = 1600     # longest side of a full-size in-article image
+THUMBNAIL_WIDTH = 480     # width of the WebP card thumbnail used on the homepage
+JPEG_QUALITY = 82
+WEBP_QUALITY = 80
+
+
+def optimise_image(path: str) -> None:
+    """Downscales an oversized image in place, keeping its filename and format.
+
+    Every failure mode is swallowed on purpose: if anything goes wrong the file
+    that was already copied is left exactly as it is, so a bad image can never
+    stop a post from publishing.
+    """
+    if not PILLOW_AVAILABLE or not os.path.exists(path):
+        return
+
+    try:
+        before = os.path.getsize(path)
+        with Image.open(path) as img:
+            img.load()
+            fmt = (img.format or "").upper()
+            if fmt not in ("PNG", "JPEG", "JPG", "WEBP"):
+                return
+
+            width, height = img.size
+            if max(width, height) <= MAX_IMAGE_EDGE:
+                return
+
+            resized = img.copy()
+            resized.thumbnail((MAX_IMAGE_EDGE, MAX_IMAGE_EDGE), Image.LANCZOS)
+
+            if fmt == "PNG":
+                # Photographic PNGs shrink a lot when palettised; keep alpha intact.
+                resized.save(path, "PNG", optimize=True)
+            elif fmt == "WEBP":
+                resized.save(path, "WEBP", quality=WEBP_QUALITY, method=6)
+            else:
+                if resized.mode in ("RGBA", "P", "LA"):
+                    resized = resized.convert("RGB")
+                resized.save(path, "JPEG", quality=JPEG_QUALITY, optimize=True, progressive=True)
+
+        after = os.path.getsize(path)
+        saved = (before - after) / 1024
+        if saved > 0:
+            print(f"   Optimised {os.path.basename(path)}: "
+                  f"{width}x{height} -> max {MAX_IMAGE_EDGE}px, saved {saved:.0f} KB")
+    except Exception as exc:
+        print(f"   Could not optimise '{os.path.basename(path)}' ({exc}); keeping the original.")
+
+
+def image_dimensions(path: str):
+    """Returns (width, height) for an image, or (None, None) if it cannot be read.
+
+    Recorded in the post front matter so the layout can set width/height on the
+    cover image and reserve its space before it loads (no layout shift).
+    """
+    if not PILLOW_AVAILABLE or not os.path.exists(path):
+        return None, None
+    try:
+        with Image.open(path) as img:
+            return img.size
+    except Exception:
+        return None, None
+
+
+def make_thumbnail(source_path: str) -> str:
+    """Writes a small WebP card thumbnail next to the image, in _assets/images/thumbs/.
+
+    The homepage uses this when it exists and silently falls back to the full
+    image when it does not, so a failure here is harmless.
+    """
+    if not PILLOW_AVAILABLE or not os.path.exists(source_path):
+        return None
+
+    try:
+        base_name = os.path.splitext(os.path.basename(source_path))[0]
+        os.makedirs(JEKYLL_THUMBS_DIR, exist_ok=True)
+        dest_path = os.path.join(JEKYLL_THUMBS_DIR, f"{base_name}.webp")
+
+        with Image.open(source_path) as img:
+            img.load()
+            thumb = img.copy()
+            if thumb.mode not in ("RGB", "RGBA"):
+                thumb = thumb.convert("RGB")
+            thumb.thumbnail((THUMBNAIL_WIDTH, THUMBNAIL_WIDTH * 3), Image.LANCZOS)
+            thumb.save(dest_path, "WEBP", quality=WEBP_QUALITY, method=6)
+
+        size_kb = os.path.getsize(dest_path) / 1024
+        print(f"   Thumbnail: '{dest_path}' ({size_kb:.0f} KB)")
+        return dest_path
+    except Exception as exc:
+        print(f"   Could not build a thumbnail for '{os.path.basename(source_path)}' ({exc}).")
+        return None
+
+def strip_markdown_for_speech(content: str) -> str:
+    """Cleans markdown content into plain readable text suitable for TTS voice synthesis."""
+    # 1. Remove code blocks ```...```
+    text = re.sub(r'```.*?```', '', content, flags=re.DOTALL)
+    
+    # 2. Remove wiki image links ![[...]]
+    text = re.sub(r'!\[\[.*?\]\]', '', text)
+    
+    # 3. Remove standard image links ![alt](url)
+    text = re.sub(r'!\[.*?\]\(.*?\)', '', text)
+    
+    # 4. Replace standard markdown links [text](url) with just text
+    text = re.sub(r'\[(.*?)\]\(.*?\)', r'\1', text)
+    
+    # 5. Remove header markers # Header -> Header
+    text = re.sub(r'(?m)^#+\s*', '', text)
+    
+    # 6. Remove bullet/numbered list markers at start of lines
+    text = re.sub(r'(?m)^[-*+]\s+', '', text)
+    text = re.sub(r'(?m)^\d+\.\s+', '', text)
+    
+    # 7. Remove blockquote markers at start of lines
+    text = re.sub(r'(?m)^>\s*', '', text)
+    
+    # 8. Remove bold/italic/code markers
+    text = re.sub(r'\*\*|__|\*|_|`', '', text)
+    
+    # 9. Clean up excess blank lines and whitespace
+    text = re.sub(r'\n\s*\n', '\n\n', text)
+    return text.strip()
+
+def generate_tts_for_post(post_name: str, content: str, voice: str = DEFAULT_TTS_VOICE) -> str:
+    """Generates an MP3 audio file in JEKYLL_TTS_DIR using edge-tts if it does not already exist."""
+    os.makedirs(JEKYLL_TTS_DIR, exist_ok=True)
+    audio_filename = f"{post_name}.mp3"
+    dest_path = os.path.join(JEKYLL_TTS_DIR, audio_filename)
+    
+    if os.path.exists(dest_path):
+        print(f"🔊 Audio file already exists: '{dest_path}'")
+        return dest_path
+        
+    plain_text = strip_markdown_for_speech(content)
+    if not plain_text.strip():
+        print(f"⚠️ Skipping TTS for '{post_name}': no readable text found.")
+        return None
+        
+    print(f"🎙️ Synthesizing TTS audio for '{post_name}' using edge-tts ({voice})...")
+    try:
+        async def _speak():
+            communicate = edge_tts.Communicate(plain_text, voice)
+            await communicate.save(dest_path)
+            
+        asyncio.run(_speak())
+        print(f"✅ Generated TTS audio: '{dest_path}'")
+        return dest_path
+    except Exception as e:
+        print(f"❌ Error generating TTS audio for '{post_name}': {str(e)}")
+        return None
+
+def process_existing_posts_tts():
+    """Scans all posts in JEKYLL_POSTS_DIR and auto-generates missing TTS audio files."""
+    if not os.path.exists(JEKYLL_POSTS_DIR):
+        return
+        
+    print("\n🎧 Checking TTS audio files for all existing posts...")
+    for file in sorted(os.listdir(JEKYLL_POSTS_DIR)):
+        if file.endswith('.md') or file.endswith('.markdown'):
+            post_name = os.path.splitext(file)[0]
+            audio_path = os.path.join(JEKYLL_TTS_DIR, f"{post_name}.mp3")
+            if not os.path.exists(audio_path):
+                post_path = os.path.join(JEKYLL_POSTS_DIR, file)
+                try:
+                    post = frontmatter.load(post_path)
+                    generate_tts_for_post(post_name, post.content)
+                except Exception as e:
+                    print(f"⚠️ Could not load post '{file}' for TTS: {str(e)}")
+
+def clean_alt_text(filename: str) -> str:
+    """Helper to clean a filename and generate a readable image alt text."""
+    name_part, _ = os.path.splitext(filename)
+    clean_name = name_part.replace('_', ' ').replace('-', ' ')
+    clean_name = re.sub(r'\s+', ' ', clean_name).strip()
+    return clean_name.capitalize()
+
+def process_images(markdown_content: str) -> str:
+    """Finds ![[image]] tags, copies the files from Obsidian images folder to Jekyll _assets/images, 
+    and replaces tags with standard markdown image links. Handles optional alt text or width.
+    """
+    # Pattern matches ![[filename.ext]] or ![[filename.ext|alt_text_or_width]]
+    pattern = r'!\[\[([^\]|]+)(?:\|([^\]]*))?\]\]'
+    
+    def replace_match(match):
+        original_filename = match.group(1).strip()
+        alt_or_width = match.group(2).strip() if match.group(2) else ""
+        filename_lower = original_filename.lower()
+        
+        # Check if alt_or_width is a width number (e.g., 300, 300x200)
+        is_width = bool(re.match(r'^\d+(?:x\d+)?$', alt_or_width))
+        
+        if alt_or_width and not is_width:
+            alt_text = alt_or_width
+        else:
+            alt_text = clean_alt_text(original_filename)
+            
+        # Look for the file in the Obsidian images folder
+        src_path = os.path.join(OBSIDIAN_IMAGES_DIR, original_filename)
+        
+        # If not found directly, do a case-insensitive check in the folder
+        if not os.path.exists(src_path):
+            src_path = None
+            if os.path.exists(OBSIDIAN_IMAGES_DIR):
+                for f in os.listdir(OBSIDIAN_IMAGES_DIR):
+                    if f.lower() == filename_lower:
+                        src_path = os.path.join(OBSIDIAN_IMAGES_DIR, f)
+                        break
+        
+        if src_path and os.path.exists(src_path):
+            # Generate a URL-safe destination filename
+            base_name = os.path.basename(src_path)
+            name_part, ext_part = os.path.splitext(base_name)
+            safe_name = name_part.lower().replace(" ", "-").replace("_", "-")
+            # Remove characters that aren't letters, numbers, or hyphens
+            safe_name = re.sub(r'[^a-z0-9\-]', '', safe_name)
+            safe_filename = f"{safe_name}{ext_part.lower()}"
+            
+            os.makedirs(JEKYLL_IMAGES_DIR, exist_ok=True)
+            dest_path = os.path.join(JEKYLL_IMAGES_DIR, safe_filename)
+            
+            # Copy the file
+            try:
+                shutil.copy2(src_path, dest_path)
+                print(f"📸 Copied image: '{original_filename}' -> '{dest_path}'")
+                optimise_image(dest_path)
+                # Return standard markdown image syntax pointing to the copied asset
+                return f"![{alt_text}](/_assets/images/{safe_filename})"
+            except Exception as e:
+                print(f"⚠️ Failed to copy image {original_filename}: {str(e)}")
+                return match.group(0) # Keep original if copy failed
+        else:
+            print(f"⚠️ Image not found in Obsidian images folder: '{original_filename}'")
+            return match.group(0) # Keep original
+            
+    return re.sub(pattern, replace_match, markdown_content)
+
+
+def generate_description(content: str, max_len: int = 155) -> str:
+    """Auto-generates a clean plain text meta description from markdown content."""
+    # 1. Remove code blocks
+    text = re.sub(r'```.*?```', '', content, flags=re.DOTALL)
+    
+    # 2. Remove wiki image links ![[...]]
+    text = re.sub(r'!\[\[.*?\]\]', '', text)
+    
+    # 3. Remove standard image links ![alt](url)
+    text = re.sub(r'!\[.*?\]\(.*?\)', '', text)
+    
+    # 4. Replace standard markdown links [text](url) with just text
+    text = re.sub(r'\[(.*?)\]\(.*?\)', r'\1', text)
+    
+    # 5. Remove headers completely (lines starting with #)
+    text = re.sub(r'(?m)^#+.*$', '', text)
+    
+    # 6. Remove bullet/numbered list markers at start of lines
+    text = re.sub(r'(?m)^[-*+]\s+', '', text)
+    text = re.sub(r'(?m)^\d+\.\s+', '', text)
+    
+    # 7. Remove blockquote markers at start of lines
+    text = re.sub(r'(?m)^>\s*', '', text)
+    
+    # 8. Remove bold/italic/code markers
+    text = re.sub(r'\*\*|__|\*|_|`', '', text)
+    
+    # 9. Clean up whitespace and newlines
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    if not text:
+        return ""
+        
+    if len(text) <= max_len:
+        return text
+
+    # Prefer ending on a complete sentence, so the card excerpt reads as a
+    # sentence rather than a fragment trailing into an ellipsis.
+    # Stay at or under max_len: search engines cut meta descriptions around 160
+    # characters, and the homepage card should not need a second truncation.
+    sentence_ends = [m.end() for m in re.finditer(r'[.!?]["’”)]*(?:\s|$)', text)]
+    within = [end for end in sentence_ends if 60 <= end <= max_len]
+    if within:
+        return text[:max(within)].strip()
+
+    # No sentence break fits; allow a little overshoot to finish the first one.
+    slight_overshoot = [end for end in sentence_ends if max_len < end <= max_len + 25]
+    if slight_overshoot:
+        return text[:min(slight_overshoot)].strip()
+
+    truncated = text[:max_len]
+    last_space = truncated.rfind(' ')
+    if last_space > max_len - 20:
+        truncated = truncated[:last_space]
+
+    return truncated.strip() + "…"
+
+def publish_to_jekyll(title: str, clean_markdown: str, metadata: dict) -> bool:
+    """Saves the content right into the Jekyll compilation pipeline."""
+    try:
+        date_str = datetime.date.today().strftime("%Y-%m-%d")
+        safe_title = title.lower().replace(" ", "-").replace("_", "-")
+        # Remove characters that aren't letters, numbers, or hyphens
+        safe_title = re.sub(r'[^a-z0-9\-]', '', safe_title)
+        # Collapse multiple hyphens and strip leading/trailing hyphens
+        safe_title = re.sub(r'-+', '-', safe_title).strip('-')
+        file_name = f"{date_str}-{safe_title}.md"
+        file_path = os.path.join(JEKYLL_POSTS_DIR, file_name)
+        
+        post = frontmatter.Post(clean_markdown)
+        post['layout'] = 'post'
+        post['title'] = title
+        post['date'] = date_str
+        
+        # Handle categories (mapping tags to categories and deduplicating)
+        categories = []
+        if 'tags' in metadata:
+            tags_val = metadata['tags']
+            if isinstance(tags_val, list):
+                categories.extend(tags_val)
+            elif isinstance(tags_val, str):
+                categories.append(tags_val)
+        if 'categories' in metadata:
+            cats_val = metadata['categories']
+            if isinstance(cats_val, list):
+                categories.extend(cats_val)
+            elif isinstance(cats_val, str):
+                categories.append(cats_val)
+        
+        # De-duplicate while preserving order
+        unique_categories = []
+        for cat in categories:
+            if cat not in unique_categories:
+                unique_categories.append(cat)
+                
+        if unique_categories:
+            post['categories'] = unique_categories
+            
+        # Add description for SEO optimization
+        description = metadata.get('description', '').strip()
+        if not description:
+            description = generate_description(clean_markdown)
+        if description:
+            post['description'] = description
+                
+        # Resolve and copy frontmatter image if specified
+        if 'image' in metadata and metadata['image']:
+            img_val = metadata['image']
+            while isinstance(img_val, (list, tuple)):
+                if len(img_val) > 0:
+                    img_val = img_val[0]
+                else:
+                    img_val = ""
+                    break
+            
+            raw_img_path = str(img_val).strip().strip('"').strip("'")
+            # Strip wiki-link syntax [[image.png]] or [[image.png|alt]] if present
+            match = re.search(r'\[\[?([^\]|]+)(?:\|[^\]]*)?\]?\]', raw_img_path)
+            if match:
+                raw_img_path = match.group(1).strip()
+            
+            
+            src_path = os.path.join(OBSIDIAN_IMAGES_DIR, raw_img_path)
+            if not os.path.exists(src_path):
+                src_path = None
+                if os.path.exists(OBSIDIAN_IMAGES_DIR):
+                    for f in os.listdir(OBSIDIAN_IMAGES_DIR):
+                        if f.lower() == raw_img_path.lower():
+                            src_path = os.path.join(OBSIDIAN_IMAGES_DIR, f)
+                            break
+            
+            if src_path and os.path.exists(src_path):
+                base_name = os.path.basename(src_path)
+                name_part, ext_part = os.path.splitext(base_name)
+                safe_name = name_part.lower().replace(" ", "-").replace("_", "-")
+                safe_name = re.sub(r'[^a-z0-9\-]', '', safe_name)
+                safe_filename = f"{safe_name}{ext_part.lower()}"
+                
+                os.makedirs(JEKYLL_IMAGES_DIR, exist_ok=True)
+                dest_path = os.path.join(JEKYLL_IMAGES_DIR, safe_filename)
+                
+                try:
+                    shutil.copy2(src_path, dest_path)
+                    print(f"📸 Copied frontmatter image: '{raw_img_path}' -> '{dest_path}'")
+                    optimise_image(dest_path)
+                    make_thumbnail(dest_path)
+                    post['image'] = f"/_assets/images/{safe_filename}"
+                    cover_w, cover_h = image_dimensions(dest_path)
+                    if cover_w and cover_h:
+                        post['image_width'] = cover_w
+                        post['image_height'] = cover_h
+                except Exception as e:
+                    print(f"⚠️ Failed to copy frontmatter image {raw_img_path}: {str(e)}")
+                    post['image'] = raw_img_path
+            else:
+                # If image starts with a web URL or is already resolved, keep as is
+                if raw_img_path.startswith('/') or raw_img_path.startswith('http'):
+                    post['image'] = raw_img_path
+                else:
+                    print(f"⚠️ Frontmatter image not found in Obsidian images folder: '{raw_img_path}'")
+                    post['image'] = raw_img_path
+
+        os.makedirs(JEKYLL_POSTS_DIR, exist_ok=True)
+        
+        with open(file_path, 'w', encoding='utf-8') as f:
+            frontmatter.dump(post, f)
+            
+        print(f"🎉 Successfully generated Jekyll file: {file_name}")
+
+        # Generate TTS audio file for the post
+        post_name = file_name.replace('.md', '')
+        generate_tts_for_post(post_name, clean_markdown)
+
+        return True
+    except Exception as e:
+        print(f"❌ Error writing to Jekyll: {str(e)}")
+        return False
+
+def flag_note_as_published(file_path: str, post_data):
+    """Updates the original Obsidian note frontmatter so it is never re-published."""
+    post_data['status'] = 'done-publishing'
+    post_data['published_at'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    with open(file_path, 'w', encoding='utf-8') as f:
+        frontmatter.dump(post_data, f)
+    print(f"📝 Marked local file '{os.path.basename(file_path)}' as published.")
+
+def run_pipeline():
+    print(f"🛰️ Scanning directory: {OBSIDIAN_POSTS_DIR}")
+    
+    if not os.path.exists(OBSIDIAN_POSTS_DIR):
+        print(f"❌ Error: The path '{OBSIDIAN_POSTS_DIR}' does not exist. Please check your folder naming.")
+        # Even if obsidian dir is not found, check existing posts for missing TTS audio
+        process_existing_posts_tts()
+        return
+
+    processed_count = 0
+
+    for root, _, files in os.walk(OBSIDIAN_POSTS_DIR):
+        for file in files:
+            if file.endswith('.md'):
+                file_path = os.path.join(root, file)
+                try:
+                    # Skip parsing our own API file if it happens to sit in a scanned path branch
+                    if file == "api.md":
+                        continue
+                        
+                    post = frontmatter.load(file_path)
+                    
+                    if post.get('status') == 'publish' and 'published_at' not in post.metadata:
+                        print(f"\n✨ New article draft discovered: {file}")
+                        
+                        title = post.get('title', file.replace('.md', ''))
+                        raw_content = post.content
+                        
+                        # 1. Process and copy images
+                        processed_content = process_images(raw_content)
+                        
+                        # 2. Output to Jekyll static folder build array
+                        success = publish_to_jekyll(title, processed_content, post.metadata)
+                        
+                        # 3. Alter frontmatter locally to seal it
+                        if success:
+                            flag_note_as_published(file_path, post)
+                            processed_count += 1
+                            
+                except Exception as e:
+                    print(f"⚠️ Failed reading file {file}: {str(e)}")
+                    
+    if processed_count == 0:
+        print("😴 No new notes marked 'status: publish' found. Everything is up to date!")
+
+    # Check and generate TTS audio files for all existing posts
+    process_existing_posts_tts()
+
+if __name__ == "__main__":
+    run_pipeline()
