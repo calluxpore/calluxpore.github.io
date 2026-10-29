@@ -80,3 +80,11 @@ plugins:
 include:
   - _assets
   - _fonts
+
+# OneDrive sync-conflict copies ("-Sam_OMEN") would otherwise publish every essay twice
+# and throw off the essay numbering.
+exclude:
+  - "*-Sam_OMEN*"
+  - PRODUCT.md
+  - DESIGN.md
+  - .impeccable

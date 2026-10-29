@@ -748,8 +748,9 @@ permalink: /graph/
         .sort((a, b) => b.weight - a.weight || a.members[0].id.localeCompare(b.members[0].id));
     }
 
-    // Each colour clears 3:1 contrast against both page backgrounds (#faf8f4 / #0e0e11).
-    const palette = ['#c85f42', '#4f81ce', '#2f8579', '#9070c4', '#b8791f', '#c04a74', '#6f8c46', '#71768a'];
+    // Grid Specimen palette: Crouwel blues, the signal orange and steel greys.
+    // Each colour clears 3:1 contrast against both page backgrounds (#ffffff / #0b0d12).
+    const palette = ['#0057ff', '#ff4f1f', '#6b88c9', '#7d8797', '#2f6fb5'];
 
     const clusters = detectClusters();
     clusters.forEach((cluster, i) => {

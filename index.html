@@ -16,16 +16,162 @@ title: Home
 {% endfor %}
 {% endfor %}
 {% assign all_categories = categories_list | split: "," | sort %}
+{% assign total_posts = site.posts.size %}
+{% capture slash %}<svg class="slash" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><line x1="4" y1="21" x2="20" y2="3" stroke="currentColor" stroke-width="2"/></svg>{% endcapture %}
+
+<section class="home-intro" aria-labelledby="home-title">
+  <h1 class="sr-only" id="home-title">Mind Palace: essays by Samarth Reddy</h1>
+  <p class="home-standfirst">
+    Essays by <strong>Samarth Reddy</strong> on designing for and with Artificial Intelligence, where machine perception meets human memory. {{ total_posts }} entries, numbered in the order they were written.
+  </p>
+</section>
+
+{% if total_posts > 0 %}
+{% assign newest = site.posts.first %}
+{% assign newest_name = newest.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' %}
+{% assign newest_audio_name = newest_name | append: '.mp3' %}
+{% assign newest_audio_file = site.static_files | where: "name", newest_audio_name | first %}
+{% assign newest_words = newest.content | number_of_words %}
+<section class="feature" aria-labelledby="feature-title">
+  <div class="feature-num">
+    <div class="cellnum" data-cellnum="{% if total_posts < 10 %}0{% endif %}{{ total_posts }}" aria-hidden="true"></div>
+    <span class="cellnum-fallback" aria-hidden="true">{% if total_posts < 10 %}0{% endif %}{{ total_posts }}</span>
+    <svg class="diag" viewBox="0 0 80 280" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="280" x2="80" y2="0" stroke="currentColor" stroke-width="3" vector-effect="non-scaling-stroke"/></svg>
+  </div>
+  <div class="feature-body">
+    <div>
+      <h2 class="feature-title" id="feature-title"><a href="{{ newest.url | relative_url }}"><span class="sr-only">No. {{ total_posts }}: </span>{{ newest.title | escape }}</a></h2>
+      <p class="feature-excerpt">{{ newest.description | default: newest.excerpt | strip_html | strip | truncatewords: 40, "…" }}</p>
+    </div>
+    <div>
+      <p class="feature-meta label">
+        <span>No. {{ total_posts }}</span>
+        <time datetime="{{ newest.date | date_to_xmlschema }}">{{ newest.date | date: "%b %-d, %Y" }}</time>
+        <span>{% if newest_words < 360 %}1{% else %}{{ newest_words | divided_by: 180 }}{% endif %} min read</span>
+        {% for category in newest.categories limit:2 %}<span>{{ category | escape }}</span>{% endfor %}
+      </p>
+      <div class="feature-actions">
+        <a class="btn btn-primary" href="{{ newest.url | relative_url }}">Read essay {{ slash }}</a>
+        {% if newest_audio_file %}
+        <a class="btn" href="{{ newest.url | relative_url }}#tts-audio">Listen {{ slash }}</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
 
 <div class="home-layout">
 
-{% if site.posts.size > 0 %}
-<!-- Post index: a sticky "on this page" list in the right gutter (wide screens only) -->
-<aside class="post-index" aria-label="All posts">
+<section class="posts-section" aria-labelledby="posts-title">
+  {% if total_posts > 0 %}
+
+  <div class="section-head">
+    <h2 class="posts-section-title" id="posts-title">Index of essays</h2>
+  </div>
+
+  {% if all_categories.size > 0 %}
+  <div class="category-filter-nav" role="group" aria-label="Filter by category">
+    <button class="filter-btn active" type="button" aria-pressed="true" data-filter="all">All</button>
+    {% for category in all_categories %}
+    {% if category != "" %}
+    <button class="filter-btn {% if forloop.index > 6 %}tag-extra tag-hidden{% endif %}" type="button" aria-pressed="false" data-filter="{{ category | downcase | replace: ' ', '-' }}">{{ category | escape }}</button>
+    {% endif %}
+    {% endfor %}
+    {% if all_categories.size > 6 %}
+    <button class="filter-btn-toggle" id="toggle-tags-btn" type="button" aria-expanded="false" data-more="+ {{ all_categories.size | minus: 6 }} more" data-less="Show less">+ {{ all_categories.size | minus: 6 }} more</button>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <ul class="posts-list">
+    {% for post in site.posts %}
+    {% assign post_name = post.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' %}
+    {% assign target_audio_name = post_name | append: '.mp3' %}
+    {% assign audio_file = site.static_files | where: "name", target_audio_name | first %}
+    {% assign post_num = total_posts | minus: forloop.index0 %}
+    <li class="post-item" id="post-{{ post_name | slugify }}"
+      data-categories="all,{% for category in post.categories %}{{ category | downcase | replace: ' ', '-' }}{% if forloop.last == false %},{% endif %}{% endfor %}">
+
+      <span class="post-item-num num" aria-hidden="true">{% if post_num < 10 %}0{% endif %}{{ post_num }}</span>
+
+      <div class="post-item-body">
+        <h3 class="post-item-title">
+          <a href="{{ post.url | relative_url }}"><span class="sr-only">No. {{ post_num }}: </span>{{ post.title | escape }}</a>
+        </h3>
+        <p class="post-excerpt">
+          {{ post.description | default: post.excerpt | strip_html | strip | truncatewords: 32, "…" }}
+        </p>
+        <div class="post-meta-container">
+          <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
+          <span>
+            {% assign words = post.content | number_of_words %}
+            {% if words < 360 %}1 min read{% else %}{{ words | divided_by: 180 }} min read{% endif %}
+          </span>
+          {% if audio_file %}
+          <a class="audio-badge" href="{{ post.url | relative_url }}#tts-audio" title="Listen to the audio version">
+            <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M7 4v16l13-8z" fill="currentColor"/></svg>
+            Audio
+          </a>
+          {% endif %}
+        </div>
+        {% if post.categories.size > 0 %}
+        <div class="post-categories-container">
+          {% for category in post.categories limit:3 %}
+          <span class="post-category-tag">{{ category | escape }}</span>
+          {% endfor %}
+          {% if post.categories.size > 3 %}
+          <span class="post-category-tag" title="{{ post.categories | offset:3 | join: ', ' }}">+{{ post.categories.size | minus: 3 }}</span>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+    </li>
+    {% endfor %}
+  </ul>
+
+  <div class="section-head section-head-spaced">
+    <h2 class="section-title">Publishing record</h2>
+  </div>
+  <div class="activity-panel-card">
+    <div class="activity-panel-header">
+      <span class="activity-panel-summary" id="activity-summary">
+        <strong>0 essays</strong> in the last year
+      </span>
+      <div class="year-selector" id="year-selector"></div>
+    </div>
+    <div class="activity-grid-scroll-container">
+      <div class="calendar-board" id="calendar-board" role="img" aria-label="Publishing activity calendar">
+        <span class="weekday-label" style="grid-column: 1; grid-row: 3;">Mon</span>
+        <span class="weekday-label" style="grid-column: 1; grid-row: 5;">Wed</span>
+        <span class="weekday-label" style="grid-column: 1; grid-row: 7;">Fri</span>
+      </div>
+    </div>
+    <div class="activity-panel-footer">
+      <div class="activity-legend">
+        <span>Less</span>
+        <div class="legend-cell level-0"></div>
+        <div class="legend-cell level-1"></div>
+        <div class="legend-cell level-2"></div>
+        <div class="legend-cell level-3"></div>
+        <div class="legend-cell level-4"></div>
+        <span>More</span>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <p class="lead">No essays yet.</p>
+  {% endif %}
+</section>
+
+{% if total_posts > 0 %}
+<aside class="post-index" aria-label="All essays">
   <div class="post-index-inner">
     <div class="post-index-head">
-      <span class="post-index-label">Index</span>
-      <span class="post-index-count" id="post-index-count">{{ site.posts.size }}</span>
+      <span class="post-index-label">Contents</span>
+      <span class="post-index-count" id="post-index-count">{{ total_posts }}</span>
     </div>
     <nav class="post-index-scroll" id="post-index-scroll">
       <span class="post-index-marker" id="post-index-marker" aria-hidden="true"></span>
@@ -52,161 +198,6 @@ title: Home
   </div>
 </aside>
 {% endif %}
-
-<section class="home-intro">
-  <p class="home-standfirst">
-    Welcome to my <strong>Mind Palace</strong>. Here, I dive deep into the design, code, and thinking behind everything I build. Take a
-    look inside to see how I'm experimenting with AI for humanity.
-  </p>
-  <div class="home-intro-art" aria-hidden="true">
-    <img src="{{ '/assets/images/hero-doorway.jpg' | relative_url }}" alt="" width="600" height="450" decoding="async" fetchpriority="high">
-  </div>
-</section>
-
-<!-- Posts List Section -->
-<section class="posts-section">
-  {% if site.posts.size > 0 %}
-
-  <!-- Activity Calendar Panel -->
-  <div class="activity-panel-card">
-    <div class="activity-panel-header">
-      <span class="activity-panel-summary" id="activity-summary">
-        <strong>0 articles</strong> in the last year
-      </span>
-      <div class="year-selector" id="year-selector"></div>
-    </div>
-    <div class="activity-grid-scroll-container">
-      <div class="calendar-board" id="calendar-board" role="img" aria-label="Publishing activity calendar">
-        <span class="weekday-label" style="grid-column: 1; grid-row: 3;">Mon</span>
-        <span class="weekday-label" style="grid-column: 1; grid-row: 5;">Wed</span>
-        <span class="weekday-label" style="grid-column: 1; grid-row: 7;">Fri</span>
-      </div>
-    </div>
-    <div class="activity-panel-footer">
-      <div class="activity-legend">
-        <span>Less</span>
-        <div class="legend-cell level-0"></div>
-        <div class="legend-cell level-1"></div>
-        <div class="legend-cell level-2"></div>
-        <div class="legend-cell level-3"></div>
-        <div class="legend-cell level-4"></div>
-        <span>More</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Category Filter Navigation -->
-  {% if all_categories.size > 0 %}
-  <div class="category-filter-nav">
-    <button class="filter-btn active" type="button" aria-pressed="true" data-filter="all">All</button>
-    {% for category in all_categories %}
-    {% if category != "" %}
-    <button class="filter-btn {% if forloop.index > 6 %}tag-extra tag-hidden{% endif %}" type="button" aria-pressed="false" data-filter="{{ category | downcase | replace: ' ', '-' }}">{{ category | escape }}</button>
-    {% endif %}
-    {% endfor %}
-    {% if all_categories.size > 6 %}
-    <button class="filter-btn-toggle" id="toggle-tags-btn" type="button" aria-expanded="false" data-more="+ {{ all_categories.size | minus: 6 }} more" data-less="Show less">+ {{ all_categories.size | minus: 6 }} more</button>
-    {% endif %}
-  </div>
-  <hr class="filter-separator">
-  {% endif %}
-
-  <h2 class="posts-section-title">Latest Writing</h2>
-
-  <ul class="posts-list">
-    {% for post in site.posts %}
-    {% assign post_name = post.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' %}
-    {% assign target_audio_name = post_name | append: '.mp3' %}
-    {% assign audio_file = site.static_files | where: "name", target_audio_name | first %}
-    {% assign has_audio = false %}
-    {% if audio_file %}{% assign has_audio = true %}{% endif %}
-    <li class="post-item" id="post-{{ post_name | slugify }}"
-      data-categories="all,{% for category in post.categories %}{{ category | downcase | replace: ' ', '-' }}{% if forloop.last == false %},{% endif %}{% endfor %}">
-      
-      <!-- Post Image -->
-      <a href="{{ post.url | relative_url }}" class="post-item-image-container" tabindex="-1" aria-hidden="true">
-        {% if post.image %}
-          {% assign thumb_base = post.image | split: '/' | last | split: '.' | first %}
-          {% assign thumb_path = '/_assets/images/thumbs/' | append: thumb_base | append: '.webp' %}
-          {% assign thumb_file = site.static_files | where: "path", thumb_path | first %}
-          <img src="{% if thumb_file %}{{ thumb_path | relative_url }}{% else %}{{ post.image | relative_url }}{% endif %}"
-               alt=""
-               class="post-item-image"
-               width="320" height="280"
-               loading="lazy" decoding="async">
-        {% else %}
-          <div class="post-item-image-placeholder">
-            <span>✱</span>
-          </div>
-        {% endif %}
-      </a>
-
-      <!-- Post Content Body -->
-      <div class="post-item-body">
-        <!-- Post Metadata -->
-        <div class="post-meta-container">
-          <time datetime="{{ post.date | date_to_xmlschema }}">
-            {{ post.date | date: "%B %d, %Y" }}
-          </time>
-          <span>•</span>
-          <span>
-            {% assign words = post.content | number_of_words %}
-            {% if words < 360 %} 1 min read {% else %} {{ words | divided_by: 180 }} min read {% endif %}
-          </span>
-          {% if has_audio %}
-          <span>•</span>
-          <span class="audio-badge" title="Audio version available">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-            </svg>
-            Audio
-          </span>
-          {% endif %}
-        </div>
-
-        <!-- Post Title -->
-        <h3 class="post-item-title">
-          <a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
-        </h3>
-
-        <!-- Post Excerpt -->
-        <p class="post-excerpt">
-          {{ post.description | default: post.excerpt | strip_html | strip | truncatewords: 45, "…" }}
-        </p>
-
-        <!-- Post Categories -->
-        {% if post.categories.size > 0 %}
-        <div class="post-categories-container">
-          {% for category in post.categories limit:3 %}
-          <span class="post-category-tag">{{ category | escape }}</span>
-          {% endfor %}
-          {% if post.categories.size > 3 %}
-          <span class="post-category-tag" title="{{ post.categories | offset:3 | join: ', ' }}" data-more="true">+{{ post.categories.size | minus: 3 }}</span>
-          {% endif %}
-        </div>
-        {% endif %}
-
-        <!-- Actions -->
-        <div class="post-item-actions">
-          <a class="read-more-link" href="{{ post.url | relative_url }}">Read Article</a>
-          {% if has_audio %}
-          <a class="listen-audio-link" href="{{ post.url | relative_url }}#tts-audio" title="Listen to Audio Version">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-            Listen
-          </a>
-          {% endif %}
-        </div>
-      </div>
-    </li>
-    {% endfor %}
-  </ul>
-  {% else %}
-  <p style="color: var(--text-muted); font-style: italic;">No posts found. Start writing in the <code>_posts</code>
-    directory!</p>
-  {% endif %}
-</section>
 
 </div>
 
@@ -342,7 +333,7 @@ title: Home
         const numDays = Math.round((endDate - startDate) / (24 * 60 * 60 * 1000)) + 1;
         const numWeeks = numDays / 7;
 
-        calendarBoard.style.gridTemplateColumns = `auto repeat(${numWeeks}, 10px)`;
+        calendarBoard.style.gridTemplateColumns = `auto repeat(${numWeeks}, var(--cal))`;
 
         // Generate list of dates
         const cells = [];
@@ -389,7 +380,7 @@ title: Home
 
         const summaryEl = document.getElementById('activity-summary');
         if (summaryEl) {
-          summaryEl.innerHTML = `<strong>${totalInYear} articles</strong> in ${year}`;
+          summaryEl.innerHTML = `<strong>${totalInYear} ${totalInYear === 1 ? 'essay' : 'essays'}</strong> in ${year}`;
         }
 
         // Add cells
@@ -423,11 +414,11 @@ title: Home
                 
                 let text = '';
                 if (count === 0) {
-                  text = `No articles on ${formattedDate}`;
+                  text = `No essays on ${formattedDate}`;
                 } else if (count === 1) {
-                  text = `1 article on ${formattedDate}`;
+                  text = `1 essay on ${formattedDate}`;
                 } else {
-                  text = `${count} articles on ${formattedDate}`;
+                  text = `${count} essays on ${formattedDate}`;
                 }
 
                 tooltip.textContent = text;
@@ -458,6 +449,7 @@ title: Home
         yearSelector.innerHTML = '';
         years.forEach((yr, idx) => {
           const btn = document.createElement('button');
+          btn.type = 'button';
           btn.className = `year-btn${idx === 0 ? ' active' : ''}`;
           btn.textContent = yr;
           btn.addEventListener('click', () => {

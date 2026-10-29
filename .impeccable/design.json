@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-29T00:00:00Z",
+  "title": "Design System: Mind Palace",
+  "extensions": {
+    "colorMeta": {
+      "paper": { "role": "neutral", "displayName": "Paper", "tonalRamp": ["#1a1c20", "#3a3d43", "#62666d", "#8d9097", "#b7bac0", "#dcdee2", "#f2f3f5", "#ffffff"] },
+      "sheet": { "role": "neutral", "displayName": "Sheet", "tonalRamp": ["#1a1c20", "#3a3d43", "#62666d", "#8d9097", "#b7bac0", "#dcdee2", "#f2f3f5", "#ffffff"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "tonalRamp": ["#111111", "#2b2b2b", "#474747", "#666666", "#878787", "#ababab", "#d0d0d0", "#f0f0f0"] },
+      "ink-muted": { "role": "neutral", "displayName": "Muted Ink", "tonalRamp": ["#1d2128", "#333944", "#4f5764", "#6b7381", "#8a919d", "#acb2bb", "#ced2d8", "#eceef1"] },
+      "crouwel-blue": { "role": "primary", "displayName": "Crouwel Blue", "tonalRamp": ["#001b54", "#002d8a", "#0040b8", "#0057ff", "#4b85ff", "#8eb0ff", "#c4d6ff", "#ebf1ff"] },
+      "crouwel-blue-ink": { "role": "primary", "displayName": "Blue Ink", "tonalRamp": ["#001b54", "#002d8a", "#0047d6", "#0057ff", "#4b85ff", "#8eb0ff", "#c4d6ff", "#ebf1ff"] },
+      "grid-line": { "role": "neutral", "displayName": "Grid Hairline", "tonalRamp": ["#1c2533", "#34445e", "#56698a", "#7d90b1", "#a5b5cf", "#c9d6f0", "#e2e9f6", "#f4f7fc"] },
+      "rule-soft": { "role": "neutral", "displayName": "Soft Rule", "tonalRamp": ["#1c2533", "#34445e", "#56698a", "#7d90b1", "#a5b5cf", "#c9d6f0", "#e2e9f6", "#f4f7fc"] },
+      "signal-orange": { "role": "secondary", "displayName": "Signal Orange", "tonalRamp": ["#4a1204", "#7d1f07", "#b0300c", "#e04416", "#ff4f1f", "#ff8a63", "#ffc2ad", "#fff0ea"] },
+      "signal-ink": { "role": "neutral", "displayName": "Signal Ink", "tonalRamp": ["#111111", "#2b2b2b", "#474747", "#666666", "#878787", "#ababab", "#d0d0d0", "#f0f0f0"] },
+      "surface": { "role": "neutral", "displayName": "Surface", "tonalRamp": ["#1b1e23", "#363b43", "#596069", "#7f8690", "#a7adb6", "#cdd2d9", "#e8ecf1", "#f5f7fa"] },
+      "code-text": { "role": "neutral", "displayName": "Code Rust", "tonalRamp": ["#3d1003", "#661a06", "#b0300c", "#d6441a", "#ff6a3d", "#ff8a63", "#ffc2ad", "#fff0ea"] },
+      "cell-level-0": { "role": "neutral", "displayName": "Calendar Empty", "tonalRamp": ["#edf1f8", "#b9cdf7", "#6f99f2", "#2c69ec", "#0040b8"] },
+      "cell-level-1": { "role": "primary", "displayName": "Calendar Level 1" },
+      "cell-level-2": { "role": "primary", "displayName": "Calendar Level 2" },
+      "cell-level-3": { "role": "primary", "displayName": "Calendar Level 3" },
+      "cell-level-4": { "role": "primary", "displayName": "Calendar Level 4" },
+      "dark-paper": { "role": "neutral", "displayName": "Night Paper" },
+      "dark-sheet": { "role": "neutral", "displayName": "Night Sheet" },
+      "dark-ink": { "role": "neutral", "displayName": "Night Ink" },
+      "dark-ink-muted": { "role": "neutral", "displayName": "Night Muted Ink" },
+      "dark-blue": { "role": "primary", "displayName": "Night Crouwel Blue" },
+      "dark-blue-ink": { "role": "primary", "displayName": "Night Blue Ink" },
+      "dark-rule": { "role": "primary", "displayName": "Night Structural Rule" },
+      "dark-signal-orange": { "role": "secondary", "displayName": "Night Signal Orange" },
+      "dark-surface": { "role": "neutral", "displayName": "Night Surface" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Essay, page and feature titles, mixed case." },
+      "headline": { "displayName": "Section Head", "purpose": "Uppercase section heads over a 2px ink rule." },
+      "title": { "displayName": "Entry Title", "purpose": "Index entry titles; related and prev/next titles at 19-21px." },
+      "body": { "displayName": "Reading", "purpose": "The 17-cell essay column." },
+      "body-ui": { "displayName": "Interface Body", "purpose": "Base body size outside the essay column." },
+      "label": { "displayName": "Label", "purpose": "Uppercase metadata, tags, controls; never an eyebrow." },
+      "numeral-index": { "displayName": "Index Numeral", "purpose": "Blue tabular entry numbers in index rows." },
+      "code": { "displayName": "Code", "purpose": "Code blocks and inline code only." }
+    },
+    "shadows": [
+      { "name": "paper-halo", "value": "0 0 0 var(--cell) var(--paper)", "purpose": "Extends the reading column's clean paper one cell into the margin so the grid stays outside it. Not elevation." },
+      { "name": "future-day", "value": "inset 0 0 0 1px var(--cell-level-0)", "purpose": "Outlines calendar days that have not happened yet." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Slash nudge, numeral assembly, thumbnail zoom, back-to-top entry." },
+      { "name": "transition-speed", "value": "0.18s", "purpose": "Colour and background changes on controls." },
+      { "name": "cell-in", "value": "0.5s ease-out, 14ms stagger per cell, from scale(0.4) opacity 0", "purpose": "Cell-built numeral assembly, once per load, only when visible and motion is allowed." },
+      { "name": "arrived", "value": "1.4s ease-out, soft blue wash to transparent", "purpose": "Flags an index row reached by anchor." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "720px", "purpose": "Cell becomes 24px; header unsticks; buttons two cells tall." },
+      { "name": "tablet", "value": "900px", "purpose": "Hero stacks; hero diagonal hidden; margin numeral goes inline." },
+      { "name": "wide", "value": "1100px", "purpose": "Contents column appears at and above this width." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "One-cell rectangular control with a trailing slash; secondary actions such as Listen.",
+      "html": "<a class=\"ds-btn\" href=\"#\">Listen <svg class=\"ds-slash\" viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" aria-hidden=\"true\"><line x1=\"4\" y1=\"21\" x2=\"20\" y2=\"3\" stroke=\"currentColor\" stroke-width=\"2\"/></svg></a>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: space-between; gap: 24px; min-width: 200px; height: 40px; padding: 0 14px 0 18px; font-family: 'Chakra Petch', 'Atkinson Hyperlegible', system-ui, sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border: 1px solid #0057ff; color: #0057ff; background: #ffffff; border-radius: 0; transition: background-color 0.18s, color 0.18s; } .ds-btn:hover { background: rgba(0, 87, 255, 0.08); color: #111111; } .ds-btn:focus-visible { outline: 2px solid #0057ff; outline-offset: 2px; } .ds-btn .ds-slash { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn:hover .ds-slash { transform: translateX(3px); }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one orange plane in view, ink text; inverts to ink on hover.",
+      "html": "<a class=\"ds-btn-primary\" href=\"#\">Read essay <svg class=\"ds-slash\" viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" aria-hidden=\"true\"><line x1=\"4\" y1=\"21\" x2=\"20\" y2=\"3\" stroke=\"currentColor\" stroke-width=\"2\"/></svg></a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: space-between; gap: 24px; min-width: 200px; height: 40px; padding: 0 14px 0 18px; font-family: 'Chakra Petch', 'Atkinson Hyperlegible', system-ui, sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border: 1px solid #ff4f1f; color: #111111; background: #ff4f1f; border-radius: 0; transition: background-color 0.18s, color 0.18s; } .ds-btn-primary:hover { background: #111111; color: #ffffff; border-color: #111111; } .ds-btn-primary:focus-visible { outline: 2px solid #0057ff; outline-offset: 2px; } .ds-btn-primary .ds-slash { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover .ds-slash { transform: translateX(3px); }"
+    },
+    {
+      "name": "Category Filter Cells",
+      "kind": "chip",
+      "refersTo": "filter-cell",
+      "description": "Whole-cell filters sharing soft-blue borders; the chosen one is orange with ink text.",
+      "html": "<div class=\"ds-filter\" role=\"group\" aria-label=\"Filter\"><button class=\"ds-filter-cell is-active\" aria-pressed=\"true\">All</button><button class=\"ds-filter-cell\" aria-pressed=\"false\">Human memory</button><button class=\"ds-filter-cell\" aria-pressed=\"false\">Perception</button></div>",
+      "css": ".ds-filter { display: flex; flex-wrap: wrap; border-top: 1px solid #c9d6f0; border-left: 1px solid #c9d6f0; } .ds-filter-cell { min-height: 40px; padding: 0 16px; border: 0; border-right: 1px solid #c9d6f0; border-bottom: 1px solid #c9d6f0; border-radius: 0; background: #ffffff; color: #0057ff; cursor: pointer; font-family: 'Chakra Petch', 'Atkinson Hyperlegible', system-ui, sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 0.04em; text-transform: uppercase; transition: background-color 0.18s, color 0.18s; } .ds-filter-cell:hover { background: rgba(0, 87, 255, 0.08); color: #111111; } .ds-filter-cell:focus-visible { outline: 2px solid #0057ff; outline-offset: 2px; } .ds-filter-cell.is-active { background: #ff4f1f; color: #111111; }"
+    },
+    {
+      "name": "Top Bar",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Two-cell masthead with slash, blue caps nav, orange underline on the current page, grid and theme tool cells.",
+      "html": "<header class=\"ds-bar\"><a class=\"ds-logo\" href=\"#\">Samarth Reddy <svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" aria-hidden=\"true\" style=\"color:#0057ff\"><line x1=\"4\" y1=\"21\" x2=\"20\" y2=\"3\" stroke=\"currentColor\" stroke-width=\"2\"/></svg> <span>Mind Palace</span></a><nav class=\"ds-nav\"><a class=\"ds-nav-link is-active\" href=\"#\" aria-current=\"page\">Index</a><a class=\"ds-nav-link\" href=\"#\">Graph</a><a class=\"ds-nav-link\" href=\"#\">About</a></nav><div class=\"ds-tools\"><button class=\"ds-tool\" aria-pressed=\"true\" aria-label=\"Construction grid\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\"/><line x1=\"9.17\" y1=\"3.5\" x2=\"9.17\" y2=\"20.5\"/><line x1=\"14.83\" y1=\"3.5\" x2=\"14.83\" y2=\"20.5\"/><line x1=\"3.5\" y1=\"9.17\" x2=\"20.5\" y2=\"9.17\"/><line x1=\"3.5\" y1=\"14.83\" x2=\"20.5\" y2=\"14.83\"/></svg></button><button class=\"ds-tool\" aria-label=\"Light or dark\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\"/><path d=\"M3.5 20.5 L20.5 3.5 L20.5 20.5 Z\" fill=\"currentColor\" stroke=\"none\"/></svg></button></div></header>",
+      "css": ".ds-bar { height: 80px; display: flex; align-items: center; gap: 40px; padding: 0 16px; background: #ffffff; border-bottom: 1px solid #0057ff; } .ds-logo { display: inline-flex; align-items: center; gap: 12px; font-family: 'Chakra Petch', 'Atkinson Hyperlegible', system-ui, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.02em; text-transform: uppercase; color: #111111; text-decoration: none; white-space: nowrap; } .ds-logo span { color: #0057ff; } .ds-nav { display: flex; gap: 32px; margin-left: auto; } .ds-nav-link { position: relative; padding: 6px 0; font-family: 'Chakra Petch', 'Atkinson Hyperlegible', system-ui, sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 0.05em; text-transform: uppercase; color: #0057ff; text-decoration: none; } .ds-nav-link:hover, .ds-nav-link.is-active { color: #111111; } .ds-nav-link.is-active::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #ff4f1f; } .ds-nav-link:focus-visible, .ds-tool:focus-visible { outline: 2px solid #0057ff; outline-offset: 2px; } .ds-tools { display: flex; border: 1px solid #0057ff; } .ds-tool { width: 40px; height: 38px; display: grid; place-items: center; background: transparent; border: 0; border-radius: 0; color: #0057ff; cursor: pointer; transition: background-color 0.18s, color 0.18s; } .ds-tool + .ds-tool { border-left: 1px solid #0057ff; } .ds-tool:hover { background: rgba(0, 87, 255, 0.08); color: #111111; } .ds-tool[aria-pressed='true'] { background: #0057ff; color: #ffffff; }"
+    },
+    {
+      "name": "Index Row",
+      "kind": "card",
+      "refersTo": "title",
+      "description": "Numbered essay entry: two-cell blue numeral, Chakra title, muted excerpt, caps meta, slash-prefixed tags.",
+      "html": "<article class=\"ds-row\"><span class=\"ds-row-num\">21</span><div><h3 class=\"ds-row-title\"><a href=\"#\">What Is It Like to Be a Bat?</a></h3><p class=\"ds-row-excerpt\">The bat came in through the window one summer evening at my grandparents&rsquo; house.</p><p class=\"ds-row-meta\"><time>Oct 17, 2026</time><span>10 min read</span></p><p class=\"ds-row-tags\"><a href=\"#\">Human memory</a><a href=\"#\">Philosophy of mind</a></p></div></article>",
+      "css": ".ds-row { display: grid; grid-template-columns: 80px minmax(0, 1fr); column-gap: 40px; padding: 40px 0; border-bottom: 1px solid #c9d6f0; background: #ffffff; } .ds-row-num { font-family: 'Chakra Petch', 'Atkinson Hyperlegible', system-ui, sans-serif; font-weight: 700; font-size: 34px; line-height: 1; color: #0057ff; font-variant-numeric: tabular-nums; } .ds-row-title { margin: 0 0 10px; font-family: 'Chakra Petch', 'Atkinson Hyperlegible', system-ui, sans-serif; font-weight: 600; font-size: 28px; line-height: 1.12; } .ds-row-title a { color: #111111; text-decoration: none; } .ds-row-title a:hover { color: #0057ff; text-decoration: underline; text-decoration-thickness: 2px; } .ds-row-title a:focus-visible, .ds-row-tags a:focus-visible { outline: 2px solid #0057ff; outline-offset: 2px; } .ds-row-excerpt { margin: 0 0 14px; max-width: 62ch; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 17px; line-height: 1.55; color: #4f5764; } .ds-row-meta { display: flex; gap: 4px 16px; margin: 0; font-family: 'Chakra Petch', 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #4f5764; font-variant-numeric: tabular-nums; } .ds-row-tags { display: flex; flex-wrap: wrap; gap: 0 14px; margin: 8px 0 0; } .ds-row-tags a { font-family: 'Chakra Petch', 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #0057ff; text-decoration: none; } .ds-row-tags a::before { content: '/ '; color: #c9d6f0; } .ds-row-tags a:hover { color: #111111; }"
+    },
+    {
+      "name": "Cell-Built Numeral",
+      "kind": "custom",
+      "refersTo": "numeral-index",
+      "description": "Signature: digits drawn as 5x7 matrices of grid cells in ink, the final cell lit orange, assembling once on load.",
+      "html": "<div class=\"ds-cellnum\" aria-hidden=\"true\"><i style=\"grid-area:1/1\"></i><i style=\"grid-area:1/2\"></i><i style=\"grid-area:1/3\"></i><i style=\"grid-area:1/4\"></i><i style=\"grid-area:1/5\"></i><i style=\"grid-area:2/5\"></i><i style=\"grid-area:3/5\"></i><i style=\"grid-area:4/1\"></i><i style=\"grid-area:4/2\"></i><i style=\"grid-area:4/3\"></i><i style=\"grid-area:4/4\"></i><i style=\"grid-area:4/5\"></i><i style=\"grid-area:5/1\"></i><i style=\"grid-area:6/1\"></i><i style=\"grid-area:7/1\"></i><i style=\"grid-area:7/2\"></i><i style=\"grid-area:7/3\"></i><i style=\"grid-area:7/4\"></i><i class=\"hot\" style=\"grid-area:7/5\"></i></div>",
+      "css": ".ds-cellnum { display: grid; grid-auto-columns: 20px; grid-auto-rows: 20px; width: max-content; } .ds-cellnum i { display: block; background: #111111; animation: ds-cell-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; } .ds-cellnum i.hot { background: #ff4f1f; } @keyframes ds-cell-in { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: none; } } @media (prefers-reduced-motion: reduce) { .ds-cellnum i { animation: none; } }"
+    },
+    {
+      "name": "Listen Player",
+      "kind": "custom",
+      "refersTo": "play-button",
+      "description": "Blue-framed audio panel with a two-cell orange play square and square-thumbed 2px tracks.",
+      "html": "<div class=\"ds-player\"><button class=\"ds-play\" aria-label=\"Play\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" aria-hidden=\"true\"><polygon points=\"7 4 20 12 7 20\" fill=\"currentColor\"/></svg></button><div class=\"ds-player-main\"><span class=\"ds-player-label\">Listen to this essay</span><div class=\"ds-player-progress\"><span class=\"ds-time\">0:00</span><input class=\"ds-range\" type=\"range\" min=\"0\" max=\"100\" value=\"30\" aria-label=\"Seek\"><span class=\"ds-time\">9:41</span></div></div></div>",
+      "css": ".ds-player { display: flex; align-items: stretch; background: #ffffff; border: 1px solid #0057ff; } .ds-play { width: 80px; min-height: 80px; flex: none; display: grid; place-items: center; border: 0; border-radius: 0; background: #ff4f1f; color: #111111; cursor: pointer; } .ds-play:hover { background: #111111; color: #ffffff; } .ds-play:focus-visible { outline: 2px solid #0057ff; outline-offset: 2px; } .ds-player-main { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 8px 16px; } .ds-player-label { font-family: 'Chakra Petch', 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #111111; } .ds-player-progress { display: flex; align-items: center; gap: 10px; } .ds-time { font-family: 'Chakra Petch', 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 13px; color: #4f5764; font-variant-numeric: tabular-nums; } .ds-range { -webkit-appearance: none; appearance: none; flex: 1; height: 2px; margin: 0; background: #c9d6f0; cursor: pointer; } .ds-range::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: #0057ff; border: 0; } .ds-range::-moz-range-thumb { width: 12px; height: 12px; background: #0057ff; border: 0; border-radius: 0; }"
+    },
+    {
+      "name": "Prev / Next",
+      "kind": "nav",
+      "refersTo": "button",
+      "description": "Blue-framed two-slot grid of sheet cards with blue caps labels and Chakra titles.",
+      "html": "<nav class=\"ds-pn\"><a class=\"ds-pn-card\" href=\"#\"><span class=\"ds-pn-label\">Previous</span><span class=\"ds-pn-title\">The Weight of Everything Around Us</span></a><a class=\"ds-pn-card ds-pn-next\" href=\"#\"><span class=\"ds-pn-label\">Next</span><span class=\"ds-pn-title\">The Capybara Hypothesis</span></a></nav>",
+      "css": ".ds-pn { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #0057ff; } .ds-pn-card { display: flex; flex-direction: column; gap: 6px; padding: 20px; text-decoration: none; color: #111111; background: #ffffff; transition: background-color 0.18s; } .ds-pn-card + .ds-pn-card { border-left: 1px solid #0057ff; } .ds-pn-card:hover { background: rgba(0, 87, 255, 0.08); } .ds-pn-card:focus-visible { outline: 2px solid #0057ff; outline-offset: -2px; } .ds-pn-next { text-align: right; } .ds-pn-label { font-family: 'Chakra Petch', 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #0057ff; } .ds-pn-title { font-family: 'Chakra Petch', 'Atkinson Hyperlegible', system-ui, sans-serif; font-weight: 600; font-size: 19px; line-height: 1.2; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Grid Specimen",
+    "overview": "The blog is a type specimen of one research practice. A visible construction grid, drawn in pale Crouwel-blue hairlines on a white sheet, holds every page; each essay is a numbered entry placed on it. Structure is spoken in blue (rules, links, numerals in the index), the reader's text sits in near-black ink, and one plane of signal orange marks the single thing to act on. Nothing is rounded, nothing floats, nothing is shadowed: depth comes from rules and from the paper the reading column is cut out of.\n\nThe voice is Swiss and engineered rather than editorial-soft. Chakra Petch, a chamfered grid-built face, carries labels, numerals, the masthead and essay titles; Atkinson Hyperlegible carries every reading line. The one permitted rebellion is a single diagonal stroke (bottom-left to top-right) that recurs as the slash in the masthead, the arrow in buttons, the giant diagonal beside the hero numeral, and the blockquote mark.\n\nThe signature is the cell-built numeral: the newest essay's number assembled from whole grid cells, 5 by 7 per digit, with its last cell lit orange. The grid itself is real state, not decoration; readers can switch it off and the choice persists.",
+    "keyCharacteristics": [
+      "40px construction grid (24px under 720px), centred so 31-cell and 17-cell columns land on its lines.",
+      "Square corners everywhere; 1px blue structural rules, 2px ink rules under section heads.",
+      "One accent plane: signal orange, always carrying ink text when it carries text.",
+      "Chakra Petch caps for labels, Chakra Petch mixed case for titles, Atkinson Hyperlegible for reading.",
+      "Cell-built 5x7 numerals with one orange terminal cell.",
+      "Light and dark themes are full token swaps, not filters."
+    ],
+    "rules": [
+      { "name": "The One Plane Rule", "body": "Signal orange is the only accent fill on any screen, and a filled orange plane always carries ink text (signal-ink), never white.", "section": "colors" },
+      { "name": "The Blue Is Structure Rule", "body": "Blue marks structure and navigation: rules, links, numerals, borders. It is never used as a large decorative fill; its only fills are pressed or active controls.", "section": "colors" },
+      { "name": "The Ink Hover Rule", "body": "Interactive blue and orange resolve to ink on hover (orange planes invert to ink with paper text).", "section": "colors" },
+      { "name": "The Caps Are Metadata Rule", "body": "Chakra caps label data (dates, counts, categories, controls) and section heads. They never sit above a heading as an eyebrow or kicker.", "section": "typography" },
+      { "name": "The Mixed-Case Title Rule", "body": "Essay titles stay mixed case in Chakra Petch for readability of long titles; only section heads and controls go uppercase.", "section": "typography" },
+      { "name": "The Tabular Numbers Rule", "body": "Every numeral in data (counts, dates, times, index numbers) uses tabular figures.", "section": "typography" },
+      { "name": "The Rules Not Shadows Rule", "body": "Separate with a line or a paper cut-out, never with a shadow or a tonal card.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do size and space in cells (40px; 24px under 720px) and keep wide layouts on the 31-cell container and essays on the 17-cell column so both land on the grid.",
+      "Do keep every corner square (0px) and separate with 1px blue or soft-blue rules, or a 2px ink rule under section heads.",
+      "Do put ink text on every orange plane, and limit orange planes to the one primary action or active state in view.",
+      "Do resolve blue and orange hovers to ink.",
+      "Do set labels, dates and counts in Chakra Petch caps with tabular figures, and keep essay titles mixed case.",
+      "Do carry every token in both themes; dark mode is its own palette, not an inversion.",
+      "Do treat the grid toggle as real state: persisted, keyboard-reachable (G), applied before paint.",
+      "Do respect reduced motion: numeral assembly and transitions collapse to instant."
+    ],
+    "donts": [
+      "Don't round corners or use pill shapes, except data dots in the graph.",
+      "Don't use drop shadows or tonal cards for depth.",
+      "Don't put white text on signal orange or use orange as a decorative fill.",
+      "Don't add a second accent hue to the interface.",
+      "Don't place caps labels above headings as eyebrows or kickers.",
+      "Don't introduce a second diagonal angle or decorative strokes beyond the one rising slash.",
+      "Don't let the grid run behind the reading column; essays sit on clean paper.",
+      "Don't use MonoLisa outside code."
+    ]
+  }
+}
