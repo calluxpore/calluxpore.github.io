@@ -355,11 +355,6 @@ p { margin: 0 0 1.1em; }
   grid-column: 1 / span 13; position: relative;
   min-height: calc(var(--cell) * 7);
 }
-.feature-num .diag {
-  position: absolute; left: calc(var(--cell) * 11.5); top: 0;
-  width: calc(var(--cell) * 2); height: calc(var(--cell) * 7);
-  color: var(--blue);
-}
 .feature-body { grid-column: 15 / -1; display: flex; flex-direction: column; justify-content: space-between; gap: 24px; }
 .feature-title { font-size: clamp(36px, 4.2vw, 60px); font-weight: 700; line-height: 1; }
 .feature-title a { color: var(--ink); text-decoration: none; }
@@ -386,7 +381,7 @@ p { margin: 0 0 1.1em; }
 }
 
 /* Activity calendar */
-.section-head-spaced { margin-top: calc(var(--cell) * 2); }
+.home-record { padding: var(--cell) 0; border-bottom: 1px solid var(--rule); }
 .activity-panel-card {
   margin: var(--cell) 0 0;
   background: var(--sheet); border: 1px solid var(--rule);
@@ -701,7 +696,6 @@ body .tg-panel-label { font-size: 12px; }
   .home-intro, .feature { display: block; }
   .home-standfirst { margin-top: 20px; }
   .feature-num { min-height: 0; margin-bottom: var(--cell); }
-  .feature-num .diag { display: none; }
   .footer-container { grid-template-columns: 1fr 1fr; }
   .footer-left { grid-column: 1 / -1; }
   .post-number { position: static; margin-bottom: var(--cell); }

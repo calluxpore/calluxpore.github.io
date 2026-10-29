@@ -27,6 +27,40 @@ title: Home
 </section>
 
 {% if total_posts > 0 %}
+<section class="home-record" aria-label="Publishing record">
+  <div class="section-head">
+    <h2 class="section-title">Publishing record</h2>
+  </div>
+  <div class="activity-panel-card">
+    <div class="activity-panel-header">
+      <span class="activity-panel-summary" id="activity-summary">
+        <strong>0 essays</strong> in the last year
+      </span>
+      <div class="year-selector" id="year-selector"></div>
+    </div>
+    <div class="activity-grid-scroll-container">
+      <div class="calendar-board" id="calendar-board" role="img" aria-label="Publishing activity calendar">
+        <span class="weekday-label" style="grid-column: 1; grid-row: 3;">Mon</span>
+        <span class="weekday-label" style="grid-column: 1; grid-row: 5;">Wed</span>
+        <span class="weekday-label" style="grid-column: 1; grid-row: 7;">Fri</span>
+      </div>
+    </div>
+    <div class="activity-panel-footer">
+      <div class="activity-legend">
+        <span>Less</span>
+        <div class="legend-cell level-0"></div>
+        <div class="legend-cell level-1"></div>
+        <div class="legend-cell level-2"></div>
+        <div class="legend-cell level-3"></div>
+        <div class="legend-cell level-4"></div>
+        <span>More</span>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if total_posts > 0 %}
 {% assign newest = site.posts.first %}
 {% assign newest_name = newest.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' %}
 {% assign newest_audio_name = newest_name | append: '.mp3' %}
@@ -36,7 +70,6 @@ title: Home
   <div class="feature-num">
     <div class="cellnum" data-cellnum="{% if total_posts < 10 %}0{% endif %}{{ total_posts }}" aria-hidden="true"></div>
     <span class="cellnum-fallback" aria-hidden="true">{% if total_posts < 10 %}0{% endif %}{{ total_posts }}</span>
-    <svg class="diag" viewBox="0 0 80 280" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="280" x2="80" y2="0" stroke="currentColor" stroke-width="3" vector-effect="non-scaling-stroke"/></svg>
   </div>
   <div class="feature-body">
     <div>
@@ -130,36 +163,6 @@ title: Home
     </li>
     {% endfor %}
   </ul>
-
-  <div class="section-head section-head-spaced">
-    <h2 class="section-title">Publishing record</h2>
-  </div>
-  <div class="activity-panel-card">
-    <div class="activity-panel-header">
-      <span class="activity-panel-summary" id="activity-summary">
-        <strong>0 essays</strong> in the last year
-      </span>
-      <div class="year-selector" id="year-selector"></div>
-    </div>
-    <div class="activity-grid-scroll-container">
-      <div class="calendar-board" id="calendar-board" role="img" aria-label="Publishing activity calendar">
-        <span class="weekday-label" style="grid-column: 1; grid-row: 3;">Mon</span>
-        <span class="weekday-label" style="grid-column: 1; grid-row: 5;">Wed</span>
-        <span class="weekday-label" style="grid-column: 1; grid-row: 7;">Fri</span>
-      </div>
-    </div>
-    <div class="activity-panel-footer">
-      <div class="activity-legend">
-        <span>Less</span>
-        <div class="legend-cell level-0"></div>
-        <div class="legend-cell level-1"></div>
-        <div class="legend-cell level-2"></div>
-        <div class="legend-cell level-3"></div>
-        <div class="legend-cell level-4"></div>
-        <span>More</span>
-      </div>
-    </div>
-  </div>
 
   {% else %}
   <p class="lead">No essays yet.</p>
