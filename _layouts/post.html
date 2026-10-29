@@ -11,12 +11,6 @@ layout: default
   {% endfor %}
 
   <header class="post-header">
-    {% if post_num > 0 %}
-    <div class="post-number" aria-hidden="true">
-      <div class="cellnum" data-cellnum="{% if post_num < 10 %}0{% endif %}{{ post_num }}"></div>
-      <span class="cellnum-fallback">{% if post_num < 10 %}0{% endif %}{{ post_num }}</span>
-    </div>
-    {% endif %}
     <h1 class="post-title" itemprop="name headline">{{ page.title | escape }}</h1>
     <div class="post-meta">
       {% if post_num > 0 %}<span class="num-inline">No. {{ post_num }}</span>{% endif %}
@@ -49,16 +43,6 @@ layout: default
     </div>
     {% endif %}
   </header>
-
-  {% if page.image %}
-  <figure class="post-hero">
-    <img src="{{ page.image | relative_url }}"
-         alt=""
-         {% if page.image_width and page.image_height %}width="{{ page.image_width }}" height="{{ page.image_height }}"{% endif %}
-         fetchpriority="high" decoding="async"
-         itemprop="image">
-  </figure>
-  {% endif %}
 
   {% assign post_name = page.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' %}
   {% assign target_audio_name = post_name | append: '.mp3' %}
