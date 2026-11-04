@@ -32,11 +32,11 @@ Must preserve:
 - Category filter on the homepage and the d3 category graph page.
 - Related reading, previous/next navigation, reading progress, RSS, SEO tags, light/dark theme.
 
-Not binding: the current fonts (Atkinson Hyperlegible, MonoLisa) may be replaced.
+Not binding: the current fonts (Big Shoulders, Public Sans, MonoLisa) may be replaced.
 
 ## Brand Commitments
 
-Name: Samarth Reddy, Creative Technologist. Site name "Mind Palace" in the intro. The ✱ mark is current but not confirmed as binding.
+Name: Samarth Reddy, Creative Technologist. Site name "Mind Palace", set large on the homepage.
 
 ## Evidence on Hand
 

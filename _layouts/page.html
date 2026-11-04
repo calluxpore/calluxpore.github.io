@@ -1,14 +1,20 @@
 ---
 layout: default
 ---
-<article class="page-article{% if page.wide or page.url == '/graph/' %} is-wide{% endif %}">
+<article class="page-article{% if page.wide or page.url == '/graph/' %} is-wide{% endif %}{% if page.image %} has-image{% endif %}">
 
-  <header class="post-header">
-    <h1 class="post-title">{{ page.title | escape }}</h1>
-  </header>
+  <div class="page-text">
+    {% if page.title %}<h1 class="page-title">{{ page.title | escape }}</h1>{% endif %}
 
-  <div class="post-content">
-    {{ content }}
+    <div class="post-content">
+      {{ content }}
+    </div>
   </div>
+
+  {% if page.image %}
+  <div class="page-picture">
+    <img src="{{ page.image | relative_url }}" {% if page.image_width %}width="{{ page.image_width }}" height="{{ page.image_height }}"{% endif %} alt="{{ page.image_alt | escape }}">
+  </div>
+  {% endif %}
 
 </article>

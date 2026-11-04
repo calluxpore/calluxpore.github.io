@@ -3,116 +3,75 @@ layout: default
 title: Home
 ---
 
-{% assign categories_list = "" %}
-{% for post in site.posts %}
-{% for category in post.categories %}
-{% unless categories_list contains category %}
-{% if categories_list == "" %}
-{% assign categories_list = category %}
-{% else %}
-{% assign categories_list = categories_list | append: "," | append: category %}
-{% endif %}
-{% endunless %}
-{% endfor %}
-{% endfor %}
-{% assign all_categories = categories_list | split: "," | sort %}
 {% assign total_posts = site.posts.size %}
-{% capture slash %}<svg class="slash" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><line x1="4" y1="21" x2="20" y2="3" stroke="currentColor" stroke-width="2"/></svg>{% endcapture %}
+{% assign category_keys = '' %}
+{% for entry in site.categories %}
+  {% assign score = entry[1].size | prepend: '00' | slice: -3, 3 %}
+  {% assign category_keys = category_keys | append: score | append: '|' | append: entry[0] | append: ',' %}
+{% endfor %}
+{% assign ranked_categories = category_keys | split: ',' | sort | reverse %}
 
-<section class="home-intro" aria-labelledby="home-title">
-  <h1 class="sr-only" id="home-title">Mind Palace: essays by Samarth Reddy</h1>
-  <p class="home-standfirst">
-    Essays by <strong>Samarth Reddy</strong> on designing for and with Artificial Intelligence, where machine perception meets human memory. {{ total_posts }} entries, numbered in the order they were written.
-  </p>
-</section>
-
-{% if total_posts > 0 %}
-<section class="home-record" aria-label="Publishing record">
-  <div class="section-head">
-    <h2 class="section-title">Publishing record</h2>
-  </div>
-  <div class="activity-panel-card">
-    <div class="activity-panel-header">
-      <span class="activity-panel-summary" id="activity-summary">
-        <strong>0 essays</strong> in the last year
-      </span>
-      <div class="year-selector" id="year-selector"></div>
-    </div>
-    <div class="activity-grid-scroll-container">
-      <div class="calendar-board" id="calendar-board" role="img" aria-label="Publishing activity calendar">
-        <span class="weekday-label" style="grid-column: 1; grid-row: 3;">Mon</span>
-        <span class="weekday-label" style="grid-column: 1; grid-row: 5;">Wed</span>
-        <span class="weekday-label" style="grid-column: 1; grid-row: 7;">Fri</span>
-      </div>
-    </div>
-    <div class="activity-panel-footer">
-      <div class="activity-legend">
-        <span>Less</span>
-        <div class="legend-cell level-0"></div>
-        <div class="legend-cell level-1"></div>
-        <div class="legend-cell level-2"></div>
-        <div class="legend-cell level-3"></div>
-        <div class="legend-cell level-4"></div>
-        <span>More</span>
-      </div>
-    </div>
-  </div>
-</section>
-{% endif %}
-
-{% if total_posts > 0 %}
 {% assign newest = site.posts.first %}
-{% assign newest_name = newest.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' %}
-{% assign newest_audio_name = newest_name | append: '.mp3' %}
-{% assign newest_audio_file = site.static_files | where: "name", newest_audio_name | first %}
-{% assign newest_words = newest.content | number_of_words %}
-<section class="feature" aria-labelledby="feature-title">
-  <div class="feature-num">
-    <div class="cellnum" data-cellnum="{% if total_posts < 10 %}0{% endif %}{{ total_posts }}" aria-hidden="true"></div>
-    <span class="cellnum-fallback" aria-hidden="true">{% if total_posts < 10 %}0{% endif %}{{ total_posts }}</span>
-  </div>
-  <div class="feature-body">
-    <div>
-      <h2 class="feature-title" id="feature-title"><a href="{{ newest.url | relative_url }}"><span class="sr-only">No. {{ total_posts }}: </span>{{ newest.title | escape }}</a></h2>
-      <p class="feature-excerpt">{{ newest.description | default: newest.excerpt | strip_html | strip | truncatewords: 40, "…" }}</p>
+<section class="hero" id="hero" aria-labelledby="home-title">
+  <div class="stage" id="stage">
+    <div class="hero-pic">
+      <img src="{{ '/assets/images/hero-doorway.jpg' | relative_url }}" width="1200" height="896" fetchpriority="high" alt="A curved staircase rising through warm fog to a glowing arched doorway">
     </div>
-    <div>
-      <p class="feature-meta label">
-        <span>No. {{ total_posts }}</span>
-        <time datetime="{{ newest.date | date_to_xmlschema }}">{{ newest.date | date: "%b %-d, %Y" }}</time>
-        <span>{% if newest_words < 360 %}1{% else %}{{ newest_words | divided_by: 180 }}{% endif %} min read</span>
-        {% for category in newest.categories limit:2 %}<span>{{ category | escape }}</span>{% endfor %}
-      </p>
-      <div class="feature-actions">
-        <a class="btn btn-primary" href="{{ newest.url | relative_url }}">Read essay {{ slash }}</a>
-        {% if newest_audio_file %}
-        <a class="btn" href="{{ newest.url | relative_url }}#tts-audio">Listen {{ slash }}</a>
-        {% endif %}
-      </div>
+    <div class="hero-text hero-title"><h1 id="home-title">Mind<br>Palace</h1></div>
+    <div class="hero-text hero-side">
+      <p>Essays on where machine perception meets human memory, by Samarth Reddy.</p>
+      {% if newest %}<a class="btn" href="{{ newest.url | relative_url }}">Read the newest essay</a>{% endif %}
     </div>
   </div>
 </section>
+
+{% if total_posts > 0 %}
+<section class="rooms" aria-labelledby="rooms-title">
+  <div class="rooms-head">
+    <h2 id="rooms-title" data-r>The newest rooms</h2>
+    <p data-r>Each essay is a room with one memory in it. These are the last four to open.</p>
+  </div>
+  {% for post in site.posts limit:4 %}
+  {% assign post_name = post.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' %}
+  {% assign target_audio_name = post_name | append: '.mp3' %}
+  {% assign audio_file = site.static_files | where: "name", target_audio_name | first %}
+  {% assign words = post.content | number_of_words %}
+  {% assign title_size = post.title | size %}
+  <article class="room room-{{ forloop.index }}">
+    <div class="room-text">
+      <h3 class="{% if title_size > 40 %}t-s{% elsif title_size > 24 %}t-m{% endif %}" data-r><a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h3>
+      <p data-r>{{ post.description | default: post.excerpt | strip_html | strip | truncatewords: 40, "…" }}</p>
+      <p class="room-meta" data-r>
+        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time> ·
+        {% if words < 360 %}1{% else %}{{ words | divided_by: 180 }}{% endif %} min read{% if audio_file %} ·
+        <a href="{{ post.url | relative_url }}#listen">Listen</a>{% endif %}
+      </p>
+    </div>
+    {% if post.image %}
+    <div class="room-cover" data-r>
+      <a href="{{ post.url | relative_url }}" tabindex="-1" aria-hidden="true">
+        <img src="{{ post.image | relative_url }}" {% if post.image_width %}width="{{ post.image_width }}" height="{{ post.image_height }}"{% endif %} loading="lazy" decoding="async" alt="">
+      </a>
+    </div>
+    {% endif %}
+  </article>
+  {% endfor %}
+</section>
 {% endif %}
 
-<div class="home-layout">
-
-<section class="posts-section" aria-labelledby="posts-title">
+<section class="essays" id="essays" aria-labelledby="posts-title">
   {% if total_posts > 0 %}
+  <h2 id="posts-title" data-r>All {{ total_posts }} essays</h2>
 
-  <div class="section-head">
-    <h2 class="posts-section-title" id="posts-title">Index of essays</h2>
-  </div>
-
-  {% if all_categories.size > 0 %}
-  <div class="category-filter-nav" role="group" aria-label="Filter by category">
+  {% if ranked_categories.size > 0 %}
+  <div class="category-filter-nav" role="group" aria-label="Filter by category" data-r>
     <button class="filter-btn active" type="button" aria-pressed="true" data-filter="all">All</button>
-    {% for category in all_categories %}
-    {% if category != "" %}
+    {% for key in ranked_categories %}
+    {% assign category = key | split: '|' | last %}
     <button class="filter-btn {% if forloop.index > 6 %}tag-extra tag-hidden{% endif %}" type="button" aria-pressed="false" data-filter="{{ category | downcase | replace: ' ', '-' }}">{{ category | escape }}</button>
-    {% endif %}
     {% endfor %}
-    {% if all_categories.size > 6 %}
-    <button class="filter-btn-toggle" id="toggle-tags-btn" type="button" aria-expanded="false" data-more="+ {{ all_categories.size | minus: 6 }} more" data-less="Show less">+ {{ all_categories.size | minus: 6 }} more</button>
+    {% if ranked_categories.size > 6 %}
+    <button class="filter-btn-toggle" id="toggle-tags-btn" type="button" aria-expanded="false" data-more="{{ ranked_categories.size | minus: 6 }} more themes" data-less="Fewer themes">{{ ranked_categories.size | minus: 6 }} more themes</button>
     {% endif %}
   </div>
   {% endif %}
@@ -122,87 +81,127 @@ title: Home
     {% assign post_name = post.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' %}
     {% assign target_audio_name = post_name | append: '.mp3' %}
     {% assign audio_file = site.static_files | where: "name", target_audio_name | first %}
-    {% assign post_num = total_posts | minus: forloop.index0 %}
-    <li class="post-item" id="post-{{ post_name | slugify }}"
-      data-categories="all,{% for category in post.categories %}{{ category | downcase | replace: ' ', '-' }}{% if forloop.last == false %},{% endif %}{% endfor %}">
-
-      <span class="post-item-num num" aria-hidden="true">{% if post_num < 10 %}0{% endif %}{{ post_num }}</span>
-
+    {% assign words = post.content | number_of_words %}
+    <li class="post-item" data-categories="all,{% for category in post.categories %}{{ category | downcase | replace: ' ', '-' }}{% if forloop.last == false %},{% endif %}{% endfor %}">
+      {% if post.image %}
+      {% assign thumb_name = post.image | split: '/' | last | split: '.' | first | append: '.webp' %}
+      {% assign thumb = site.static_files | where: "name", thumb_name | first %}
+      <img class="post-item-cover" src="{% if thumb %}{{ thumb.path | relative_url }}{% else %}{{ post.image | relative_url }}{% endif %}" width="400" height="400" loading="lazy" decoding="async" alt="">
+      {% endif %}
       <div class="post-item-body">
-        <h3 class="post-item-title">
-          <a href="{{ post.url | relative_url }}"><span class="sr-only">No. {{ post_num }}: </span>{{ post.title | escape }}</a>
-        </h3>
-        <p class="post-excerpt">
-          {{ post.description | default: post.excerpt | strip_html | strip | truncatewords: 32, "…" }}
-        </p>
-        <div class="post-meta-container">
-          <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
-          <span>
-            {% assign words = post.content | number_of_words %}
-            {% if words < 360 %}1 min read{% else %}{{ words | divided_by: 180 }} min read{% endif %}
-          </span>
+        <h3 class="post-item-title"><a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a></h3>
+        <div class="post-item-meta">
+          <span><time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time><br>{% if words < 360 %}1{% else %}{{ words | divided_by: 180 }}{% endif %} min read</span>
           {% if audio_file %}
-          <a class="audio-badge" href="{{ post.url | relative_url }}#tts-audio" title="Listen to the audio version">
-            <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M7 4v16l13-8z" fill="currentColor"/></svg>
-            Audio
+          <a class="audio-badge" href="{{ post.url | relative_url }}#listen" title="Listen to {{ post.title | escape }}" aria-label="Listen to {{ post.title | escape }}">
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 4v16l13-8z" fill="currentColor"/></svg>
           </a>
           {% endif %}
         </div>
-        {% if post.categories.size > 0 %}
-        <div class="post-categories-container">
-          {% for category in post.categories limit:3 %}
-          <span class="post-category-tag">{{ category | escape }}</span>
-          {% endfor %}
-          {% if post.categories.size > 3 %}
-          <span class="post-category-tag" title="{{ post.categories | offset:3 | join: ', ' }}">+{{ post.categories.size | minus: 3 }}</span>
-          {% endif %}
-        </div>
-        {% endif %}
       </div>
-
     </li>
     {% endfor %}
   </ul>
-
   {% else %}
   <p class="lead">No essays yet.</p>
   {% endif %}
 </section>
 
 {% if total_posts > 0 %}
-<aside class="post-index" aria-label="All essays">
-  <div class="post-index-inner">
-    <div class="post-index-head">
-      <span class="post-index-label">Contents</span>
-      <span class="post-index-count" id="post-index-count">{{ total_posts }}</span>
-    </div>
-    <nav class="post-index-scroll" id="post-index-scroll">
-      <span class="post-index-marker" id="post-index-marker" aria-hidden="true"></span>
-      {% assign index_month = "" %}
-      {% for post in site.posts %}
-      {% assign post_month = post.date | date: "%B %Y" %}
-      {% if post_month != index_month %}
-      {% unless forloop.first %}</ol></div>{% endunless %}
-      <div class="post-index-group">
-        <h2 class="post-index-month">{{ post.date | date: "%b %Y" }}</h2>
-        <ol class="post-index-list">
-      {% assign index_month = post_month %}
-      {% endif %}
-      {% assign index_slug = post.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' | slugify %}
-          <li>
-            <a class="post-index-link" href="#post-{{ index_slug }}" data-target="post-{{ index_slug }}">
-              <span class="post-index-title">{{ post.title | escape }}</span>
-              <time class="post-index-date" datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d" }}</time>
-            </a>
-          </li>
-      {% if forloop.last %}</ol></div>{% endif %}
-      {% endfor %}
-    </nav>
+<section class="home-record" aria-labelledby="record-title">
+  <h2 id="record-title" data-r>Publishing record</h2>
+  <div class="record-head" data-r>
+    <p class="activity-panel-summary" id="activity-summary">{{ total_posts }} essays</p>
+    <div class="year-selector" id="year-selector"></div>
   </div>
-</aside>
+  <div class="activity-grid-scroll-container" id="calendar-scroll" tabindex="0" aria-label="Publishing calendar, scrolls sideways on small screens" data-r>
+    <div class="calendar-board" id="calendar-board" role="img" aria-label="Publishing activity calendar">
+      <span class="weekday-label" style="grid-column: 1; grid-row: 3;">Mon</span>
+      <span class="weekday-label" style="grid-column: 1; grid-row: 5;">Wed</span>
+      <span class="weekday-label" style="grid-column: 1; grid-row: 7;">Fri</span>
+    </div>
+  </div>
+  <div class="activity-panel-footer">
+    <div class="activity-legend">
+      <span>Less</span>
+      <div class="legend-cell level-0"></div>
+      <div class="legend-cell level-1"></div>
+      <div class="legend-cell level-2"></div>
+      <div class="legend-cell level-3"></div>
+      <div class="legend-cell level-4"></div>
+      <span>More</span>
+    </div>
+  </div>
+</section>
+
+<section class="home-about" aria-labelledby="about-title">
+  <div class="home-about-text">
+    <h2 id="about-title" data-r>Who keeps the palace</h2>
+    <p data-r>I'm a designer and researcher with years of experience across professional practice and academia, deeply focused on designing for and with Artificial Intelligence.</p>
+    <p data-r>Right now I'm looking at how AI and human memory intersect, to build the next generation of memory-support tools.</p>
+    <ul class="creds" data-r>
+      <li><b>Digital Futures</b><span>Master's, OCAD University, Canada</span></li>
+      <li><b>Product Design</b><span>Master's, Coventry University, UK</span></li>
+      <li><b>Home</b><span>Toronto, Canada</span></li>
+    </ul>
+    <a class="btn" href="{{ '/about/' | relative_url }}" data-r>More about Sam</a>
+  </div>
+  <div class="cover-frame" id="cover-frame" data-r>
+    {% assign oldest_first = site.posts | reverse %}
+    {% for post in oldest_first %}
+    {% if post.image %}
+    {% assign thumb_name = post.image | split: '/' | last | split: '.' | first | append: '.webp' %}
+    {% assign thumb = site.static_files | where: "name", thumb_name | first %}
+    <img src="{% if thumb %}{{ thumb.path | relative_url }}{% else %}{{ post.image | relative_url }}{% endif %}" width="400" height="600" loading="lazy" decoding="async" alt="{% if forloop.first %}The essay covers, counting up from the first to the newest{% endif %}"{% if forloop.first %} class="on"{% endif %}>
+    {% endif %}
+    {% endfor %}
+  </div>
+</section>
 {% endif %}
 
-</div>
+<script>
+  // The doorway opens as the page scrolls; the frame counts up through the covers while it is on screen.
+  (function () {
+    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+
+    var hero = document.getElementById("hero");
+    var stage = document.getElementById("stage");
+    hero.classList.add("anim");
+    var ticking = false;
+    function openDoor() {
+      ticking = false;
+      var p = Math.min(1, Math.max(0, window.scrollY / window.innerHeight));
+      stage.style.setProperty("--p", p.toFixed(3));
+    }
+    window.addEventListener("scroll", function () {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(openDoor);
+      }
+    }, { passive: true });
+    openDoor();
+
+    var frame = document.getElementById("cover-frame");
+    if (!frame || !("IntersectionObserver" in window)) return;
+    var covers = frame.querySelectorAll("img");
+    var current = 0, timer = null;
+    new IntersectionObserver(function (entries) {
+      var visible = entries[0].isIntersecting;
+      if (visible && !timer) {
+        covers.forEach(function (c) { c.loading = "eager"; });
+        timer = setInterval(function () {
+          covers[current].classList.remove("on");
+          current = (current + 1) % covers.length;
+          covers[current].classList.add("on");
+        }, 1400);
+      } else if (!visible && timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }).observe(frame);
+  })();
+</script>
 
 <script id="jekyll-post-dates" type="application/json">
   [
@@ -234,7 +233,6 @@ title: Home
         }
       });
 
-      document.dispatchEvent(new CustomEvent("posts:filtered"));
     }
 
     buttons.forEach(btn => {
@@ -281,6 +279,7 @@ title: Home
             toggleBtn.setAttribute("aria-expanded", "true");
           }
           filterCategory(initialFilter);
+          document.getElementById('essays').scrollIntoView();
         } else {
           filterCategory("all");
         }
@@ -336,7 +335,7 @@ title: Home
         const numDays = Math.round((endDate - startDate) / (24 * 60 * 60 * 1000)) + 1;
         const numWeeks = numDays / 7;
 
-        calendarBoard.style.gridTemplateColumns = `auto repeat(${numWeeks}, var(--cal))`;
+        calendarBoard.style.gridTemplateColumns = `auto repeat(${numWeeks}, minmax(0, 1fr))`;
 
         // Generate list of dates
         const cells = [];
@@ -383,7 +382,7 @@ title: Home
 
         const summaryEl = document.getElementById('activity-summary');
         if (summaryEl) {
-          summaryEl.innerHTML = `<strong>${totalInYear} ${totalInYear === 1 ? 'essay' : 'essays'}</strong> in ${year}`;
+          summaryEl.innerHTML = `${totalInYear} ${totalInYear === 1 ? 'essay' : 'essays'} in ${year}`;
         }
 
         // Add cells
@@ -465,173 +464,9 @@ title: Home
 
         // Render first year by default
         renderYear(years[0]);
+        const calendarScroll = document.getElementById('calendar-scroll');
+        calendarScroll.scrollLeft = calendarScroll.scrollWidth;
       }
     }
-  });
-</script>
-<script>
-  // --- Post index sidebar: smooth scroll + scrollspy ---
-  document.addEventListener("DOMContentLoaded", function () {
-    const index = document.querySelector(".post-index");
-    if (!index) return;
-
-    const scroller = document.getElementById("post-index-scroll");
-    const marker = document.getElementById("post-index-marker");
-    const countEl = document.getElementById("post-index-count");
-    const links = [...index.querySelectorAll(".post-index-link")];
-    const entries = links
-      .map(link => ({ link, post: document.getElementById(link.dataset.target) }))
-      .filter(e => e.post);
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sidebarShown = () => getComputedStyle(index).display !== "none";
-
-    let active = null;
-    let animating = false;
-    let cancelScroll = null;
-
-    // Slide the accent marker to the active link.
-    function placeMarker() {
-      if (!active || active.link.offsetParent === null) {
-        marker.style.opacity = "0";
-        return;
-      }
-      const top = active.link.offsetTop;
-      marker.style.opacity = "1";
-      marker.style.transform = `translateY(${top}px)`;
-      marker.style.height = `${active.link.offsetHeight}px`;
-    }
-
-    // Keep the active link visible inside the sidebar's own scroll area.
-    function revealInSidebar(link) {
-      const pad = 48;
-      const top = link.offsetTop;
-      const bottom = top + link.offsetHeight;
-      if (top < scroller.scrollTop + pad) {
-        scroller.scrollTo({ top: top - pad, behavior: reducedMotion.matches ? "auto" : "smooth" });
-      } else if (bottom > scroller.scrollTop + scroller.clientHeight - pad) {
-        scroller.scrollTo({ top: bottom - scroller.clientHeight + pad, behavior: reducedMotion.matches ? "auto" : "smooth" });
-      }
-    }
-
-    function setActive(entry) {
-      if (entry === active) return;
-      if (active) {
-        active.link.classList.remove("is-active");
-        active.link.removeAttribute("aria-current");
-      }
-      active = entry;
-      if (active) {
-        active.link.classList.add("is-active");
-        active.link.setAttribute("aria-current", "true");
-        revealInSidebar(active.link);
-      }
-      placeMarker();
-    }
-
-    // The active post is the last visible one whose top has passed 35% of the viewport.
-    function updateActive() {
-      if (!sidebarShown()) return;
-      const line = window.innerHeight * 0.35;
-      let current = null;
-      for (const e of entries) {
-        if (e.post.style.display === "none") continue;
-        if (e.post.getBoundingClientRect().top <= line) current = e;
-        else if (current) break;
-      }
-      if (!current) current = entries.find(e => e.post.style.display !== "none") || null;
-      setActive(current);
-    }
-
-    let ticking = false;
-    window.addEventListener("scroll", () => {
-      if (animating || ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => { ticking = false; updateActive(); });
-    }, { passive: true });
-    window.addEventListener("resize", () => { placeMarker(); updateActive(); }, { passive: true });
-
-    // Mirror the category filter: hide links (and empty months) for filtered-out posts.
-    function syncWithFilter() {
-      let visible = 0;
-      entries.forEach(e => {
-        const shown = e.post.style.display !== "none";
-        e.link.parentElement.hidden = !shown;
-        if (shown) visible++;
-      });
-      index.querySelectorAll(".post-index-group").forEach(group => {
-        group.hidden = !group.querySelector("li:not([hidden])");
-      });
-      countEl.textContent = visible === entries.length ? entries.length : `${visible} of ${entries.length}`;
-      active = null;
-      updateActive();
-    }
-
-    document.addEventListener("posts:filtered", syncWithFilter);
-
-    // Eased scroll: quick to start, long gentle landing. Duration grows with distance.
-    const ease = t => (t < 0.5 ? 16 * t ** 5 : 1 - Math.pow(-2 * t + 2, 5) / 2);
-
-    function smoothScrollTo(targetY, done) {
-      if (cancelScroll) cancelScroll();
-      const startY = window.scrollY;
-      const maxY = document.documentElement.scrollHeight - window.innerHeight;
-      const endY = Math.max(0, Math.min(targetY, maxY));
-      const distance = endY - startY;
-
-      if (reducedMotion.matches || Math.abs(distance) < 2) {
-        window.scrollTo(0, endY);
-        done();
-        return;
-      }
-
-      const duration = Math.min(1400, 550 + Math.sqrt(Math.abs(distance)) * 14);
-      let start = null;
-      let frame = null;
-      animating = true;
-
-      const stop = () => {
-        cancelAnimationFrame(frame);
-        animating = false;
-        cancelScroll = null;
-        ["wheel", "touchstart", "keydown"].forEach(t => window.removeEventListener(t, stop));
-      };
-      // Any manual scroll input hands control straight back to the reader.
-      ["wheel", "touchstart", "keydown"].forEach(t => window.addEventListener(t, stop, { passive: true }));
-      cancelScroll = stop;
-
-      const step = now => {
-        if (start === null) start = now;
-        const t = Math.min(1, (now - start) / duration);
-        window.scrollTo(0, startY + distance * ease(t));
-        if (t < 1) {
-          frame = requestAnimationFrame(step);
-        } else {
-          stop();
-          done();
-        }
-      };
-      frame = requestAnimationFrame(step);
-    }
-
-    entries.forEach(entry => {
-      entry.link.addEventListener("click", event => {
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
-        event.preventDefault();
-        setActive(entry);
-        const y = entry.post.getBoundingClientRect().top + window.scrollY - 40;
-        smoothScrollTo(y, () => {
-          updateActive();
-          entry.post.classList.remove("is-arrived");
-          void entry.post.offsetWidth; // restart the arrival highlight
-          entry.post.classList.add("is-arrived");
-          const titleLink = entry.post.querySelector(".post-item-title a");
-          if (titleLink) titleLink.focus({ preventScroll: true });
-        });
-      });
-    });
-
-    entries.forEach(e => e.post.addEventListener("animationend", () => e.post.classList.remove("is-arrived")));
-
-    syncWithFilter();
   });
 </script>

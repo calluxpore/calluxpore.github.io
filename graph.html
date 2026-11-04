@@ -771,7 +771,7 @@ permalink: /graph/
     nodes.forEach(n => {
       n.r = radius(n.count);
       n.major = n.count >= majorThreshold;
-      measureCtx.font = `${n.major ? '700 13px' : '400 12px'} 'Atkinson Hyperlegible', system-ui, sans-serif`;
+      measureCtx.font = `${n.major ? '700 13px' : '400 12px'} 'Public Sans', system-ui, sans-serif`;
       n.labelWidth = measureCtx.measureText(n.id).width;
     });
 

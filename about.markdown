@@ -2,6 +2,10 @@
 layout: page
 title: About
 permalink: /about/
+image: /assets/images/hero-doorway.jpg
+image_width: 1200
+image_height: 896
+image_alt: A curved staircase rising through warm fog to a glowing arched doorway
 ---
 
 Hello there!

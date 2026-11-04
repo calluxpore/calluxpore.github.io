@@ -10,48 +10,14 @@ layout: default
     {% if candidate.url == page.url %}{% assign post_num = site.posts.size | minus: forloop.index0 %}{% break %}{% endif %}
   {% endfor %}
 
-  <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">{{ page.title | escape }}</h1>
-    <div class="post-meta">
-      {% if post_num > 0 %}<span class="num-inline">No. {{ post_num }}</span>{% endif %}
-      <time datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
-        {{ page.date | date: "%B %-d, %Y" }}
-      </time>
-      {% assign post_author = page.author | default: site.author %}
-      {% if post_author %}
-        <span itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <span class="post-byline-author" itemprop="name">{{ post_author | escape }}</span>
-        </span>
-      {% endif %}
-      <span>
-        {% assign words = content | number_of_words %}
-        {% if words < 360 %}
-          1 min read
-        {% else %}
-          {{ words | divided_by: 180 }} min read
-        {% endif %}
-      </span>
-    </div>
-    
-    {% if page.categories.size > 0 %}
-    <div class="post-categories-container">
-      {% for category in page.categories %}
-      <a class="post-category-tag"
-         href="{{ '/' | relative_url }}#{{ category | downcase | replace: ' ', '-' }}"
-         title="See all posts in {{ category | escape }}">{{ category | escape }}</a>
-      {% endfor %}
-    </div>
-    {% endif %}
-  </header>
-
   {% assign post_name = page.path | split: '/' | last | replace: '.md', '' | replace: '.markdown', '' %}
   {% assign target_audio_name = post_name | append: '.mp3' %}
   {% assign audio_file = site.static_files | where: "name", target_audio_name | first %}
   {% assign audio_url = nil %}
   {% if audio_file %}{% assign audio_url = audio_file.path | relative_url %}{% endif %}
 
-  {% if audio_url %}
-    <div class="audio-player-container">
+  {% capture listen_player %}{% if audio_url %}
+    <div class="audio-player-container" id="listen">
       <audio id="tts-audio" src="{{ audio_url }}" preload="metadata"></audio>
       <div class="player-controls">
         <button id="play-pause-btn" type="button" class="player-btn" aria-label="Play">
@@ -65,7 +31,7 @@ layout: default
         
         <div class="player-main">
           <div class="player-header">
-            <span class="player-label">Listen to this essay · AI voice</span>
+            <span class="player-label">Listen to this essay, read by an AI voice</span>
             <div class="player-extras">
               <button id="speed-btn" type="button" class="player-btn speed-btn" title="Playback speed" aria-label="Playback speed">1.0x</button>
               
@@ -201,8 +167,40 @@ layout: default
     </script>
   {% endif %}
 
-  <div class="post-content" itemprop="articleBody">
-    {{ content | replace: '<img src=', '<img loading="lazy" decoding="async" src=' }}
+  {% endcapture %}
+
+  {% assign title_size = page.title | size %}
+  <header class="post-header">
+    <div class="post-header-text">
+      <h1 class="post-title{% if title_size > 40 %} t-s{% elsif title_size > 24 %} t-m{% endif %}" itemprop="name headline">{{ page.title | escape }}</h1>
+      {% if page.description %}<p class="post-standfirst">{{ page.description | escape }}</p>{% endif %}
+      <p class="post-meta">
+        {% if post_num > 0 %}Essay {{ post_num }} · {% endif %}<time datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">{{ page.date | date: "%B %-d, %Y" }}</time>
+        {% assign post_author = page.author | default: site.author %}
+        {% if post_author %}· <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">{{ post_author | escape }}</span></span>{% endif %}
+        {% assign words = content | number_of_words %}
+        · {% if words < 360 %}1 min read{% else %}{{ words | divided_by: 180 }} min read{% endif %}
+      </p>
+      {% if page.categories.size > 0 %}
+      <p class="post-categories-container">
+        {% for category in page.categories %}
+        <a class="post-category-tag" href="{{ '/' | relative_url }}#{{ category | downcase | replace: ' ', '-' }}" title="See all posts in {{ category | escape }}">{{ category | escape }}</a>
+        {% endfor %}
+      </p>
+      {% endif %}
+      {{ listen_player }}
+    </div>
+    {% if page.image %}
+    <div class="post-cover">
+      <img src="{{ page.image | relative_url }}" {% if page.image_width %}width="{{ page.image_width }}" height="{{ page.image_height }}"{% endif %} alt="Cover art for {{ page.title | escape }}" fetchpriority="high">
+    </div>
+    {% endif %}
+  </header>
+
+  <div class="post-body">
+    <div class="post-content" itemprop="articleBody">
+      {{ content | replace: '<img src=', '<img loading="lazy" decoding="async" src=' }}
+    </div>
   </div>
 
   <!-- Related posts: scored by how many categories they share with this one -->
@@ -225,16 +223,17 @@ layout: default
 
   {% if related.size > 0 %}
   <section class="related-posts" aria-labelledby="related-heading">
-    <h2 class="related-posts-title" id="related-heading">Related reading</h2>
+    <h2 class="related-posts-title" id="related-heading" data-r>Related rooms</h2>
     <ul class="related-grid">
       {% for entry in related limit: 3 %}
         {% assign related_url = entry | split: '|' | last %}
         {% assign related_post = site.posts | where: 'url', related_url | first %}
         {% if related_post %}
-        <li>
+        <li data-r>
           <a class="related-card" href="{{ related_post.url | relative_url }}">
-            <span class="related-card-meta">{{ related_post.date | date: "%b %-d, %Y" }}</span>
+            {% if related_post.image %}<img src="{{ related_post.image | relative_url }}" {% if related_post.image_width %}width="{{ related_post.image_width }}" height="{{ related_post.image_height }}"{% endif %} loading="lazy" decoding="async" alt="">{% endif %}
             <span class="related-card-title">{{ related_post.title | escape }}</span>
+            <span class="related-card-meta">{{ related_post.date | date: "%b %-d, %Y" }}</span>
           </a>
         </li>
         {% endif %}
@@ -247,24 +246,18 @@ layout: default
   <nav class="post-navigation-grid" aria-label="Post navigation">
     <div class="post-nav-slot post-nav-prev">
       {% if page.previous %}
-        <a href="{{ page.previous.url | relative_url }}" class="post-nav-card" title="{{ page.previous.title | escape }}">
-          <span class="post-nav-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><line x1="21" y1="12" x2="3" y2="12"/><polyline points="9 6 3 12 9 18"/></svg></span>
-          <div class="post-nav-text">
-            <span class="post-nav-label">Previous</span>
-            <span class="post-nav-title">{{ page.previous.title | escape }}</span>
-          </div>
+        <a href="{{ page.previous.url | relative_url }}" class="post-nav-card">
+          <span class="post-nav-label">The room before</span>
+          <span class="post-nav-title">{{ page.previous.title | escape }}</span>
         </a>
       {% endif %}
     </div>
 
     <div class="post-nav-slot post-nav-next">
       {% if page.next %}
-        <a href="{{ page.next.url | relative_url }}" class="post-nav-card" title="{{ page.next.title | escape }}">
-          <div class="post-nav-text">
-            <span class="post-nav-label">Next</span>
-            <span class="post-nav-title">{{ page.next.title | escape }}</span>
-          </div>
-          <span class="post-nav-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><polyline points="15 6 21 12 15 18"/></svg></span>
+        <a href="{{ page.next.url | relative_url }}" class="post-nav-card">
+          <span class="post-nav-label">The room after</span>
+          <span class="post-nav-title">{{ page.next.title | escape }}</span>
         </a>
       {% endif %}
     </div>
