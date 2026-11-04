@@ -101,6 +101,8 @@ A 12-column grid between one pair of equal margins: 32px on desktop, 20px under 
 
 Breakpoints: 900px (rooms, essay heads and footer stack, and the doorway switches to its phone framing) and 720px (the header takes two rows, and the calendar scrolls sideways inside its own band, opening on the latest months).
 
+**Essay pages** are one centred column, 720px at most: title, cover, summary, details, listen player, then the essay. Titles, headings and details are centred, and essay paragraphs are justified with hyphenation.
+
 ## Motion
 
 - **The signature:** the doorway opens with the scroll over one screen. The picture settles while the title and sentence fade. This uses `position: sticky` and never takes over the scroll.

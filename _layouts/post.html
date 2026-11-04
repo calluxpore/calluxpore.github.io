@@ -171,8 +171,12 @@ layout: default
 
   {% assign title_size = page.title | size %}
   <header class="post-header">
-    <div class="post-header-text">
       <h1 class="post-title{% if title_size > 40 %} t-s{% elsif title_size > 24 %} t-m{% endif %}" itemprop="name headline">{{ page.title | escape }}</h1>
+    {% if page.image %}
+    <div class="post-cover">
+      <img src="{{ page.image | relative_url }}" {% if page.image_width %}width="{{ page.image_width }}" height="{{ page.image_height }}"{% endif %} alt="Cover art for {{ page.title | escape }}" fetchpriority="high">
+    </div>
+    {% endif %}
       {% if page.description %}<p class="post-standfirst">{{ page.description | escape }}</p>{% endif %}
       <p class="post-meta">
         {% if post_num > 0 %}Essay {{ post_num }} · {% endif %}<time datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">{{ page.date | date: "%B %-d, %Y" }}</time>
@@ -189,12 +193,6 @@ layout: default
       </p>
       {% endif %}
       {{ listen_player }}
-    </div>
-    {% if page.image %}
-    <div class="post-cover">
-      <img src="{{ page.image | relative_url }}" {% if page.image_width %}width="{{ page.image_width }}" height="{{ page.image_height }}"{% endif %} alt="Cover art for {{ page.title | escape }}" fetchpriority="high">
-    </div>
-    {% endif %}
   </header>
 
   <div class="post-body">
