@@ -100,6 +100,7 @@
     </svg>
   </button>
 
+  <script src="{{ '/assets/js/lenis.min.js' | relative_url }}"></script>
   <script>
     (function() {
       var root = document.documentElement;
@@ -116,6 +117,19 @@
 
       // Entrances: only what starts below the fold is held back, and only once this script runs.
       var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Smooth wheel and trackpad scrolling across the site. Touch keeps the phone's own scrolling.
+      var lenis = null;
+      if (!reduced && window.Lenis) {
+        lenis = new Lenis({
+          autoRaf: true,
+          anchors: true,
+          lerp: 0.09,
+          allowNestedScroll: true,
+          stopInertiaOnNavigate: true,
+          prevent: function(node) { return !!(node.closest && node.closest('.tg.is-expanded')); }
+        });
+      }
       if (!reduced && 'IntersectionObserver' in window) {
         var observer = new IntersectionObserver(function(entries) {
           entries.forEach(function(entry) {
@@ -163,7 +177,11 @@
         }, { passive: true });
 
         backToTopBtn.addEventListener('click', function() {
-          window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+          if (lenis) {
+            lenis.scrollTo(0);
+          } else {
+            window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+          }
         });
       }
     })();

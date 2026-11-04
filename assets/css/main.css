@@ -150,6 +150,12 @@ html {
   background-color: var(--bg);
   scrollbar-color: var(--muted) var(--bg);
 }
+html:not(.lenis) { scroll-behavior: smooth; }
+
+/* Smooth scrolling (Lenis) */
+html.lenis, html.lenis body { height: auto; }
+.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
+.lenis [data-lenis-prevent] { overscroll-behavior: contain; }
 
 body {
   margin: 0;
@@ -272,21 +278,21 @@ time, .time-display { font-variant-numeric: tabular-nums; }
 /* ---------- Home: the doorway ---------- */
 
 .hero { position: relative; height: 100svh; }
-.hero.anim { height: 235svh; }
+.hero.anim { height: 285svh; }
 .stage {
   position: sticky; top: 0; height: 100svh; overflow: hidden;
   --p: 0; --it: 14svh; --ib: 14svh; --ix: 32vw;
 }
 .hero-pic {
-  position: absolute; inset: 0;
+  position: absolute; inset: 0; will-change: clip-path;
   clip-path: inset(calc(var(--it) * (1 - var(--p))) calc(var(--ix) * (1 - var(--p))) calc(var(--ib) * (1 - var(--p))) round calc(var(--radius) * (1 - var(--p))));
 }
 .hero-pic img {
   width: 100%; height: 100%; object-fit: cover; object-position: 72% 40%;
-  transform-origin: 72% 36%;
+  transform-origin: 72% 36%; will-change: transform;
   transform: translateX(calc(-22vw * (1 - var(--p)))) translateY(calc(14svh * (1 - var(--p)))) scale(calc(1 + 0.35 * (1 - var(--p))));
 }
-.hero-text { position: absolute; z-index: 2; opacity: calc(1 - var(--p) * 2.6); transform: translateY(calc(var(--p) * -60px)); }
+.hero-text { position: absolute; z-index: 2; will-change: opacity, transform; opacity: calc(1 - var(--p) * 2.6); transform: translateY(calc(var(--p) * -60px)); }
 .hero-title { left: var(--m); bottom: 14svh; }
 .hero-title h1 { font-size: var(--step-mega); line-height: 0.86; }
 .hero-side { right: var(--m); bottom: 14svh; width: min(25vw, 340px); }

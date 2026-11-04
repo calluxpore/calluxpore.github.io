@@ -105,7 +105,8 @@ Breakpoints: 900px (rooms, essay heads and footer stack, and the doorway switche
 
 ## Motion
 
-- **The signature:** the doorway opens with the scroll over one screen. The picture settles while the title and sentence fade. This uses `position: sticky` and never takes over the scroll.
+- **Scrolling:** wheel and trackpad scrolling is smoothed site-wide by Lenis (`assets/js/lenis.min.js`). Touch keeps native scrolling, and reduced motion turns it off.
+- **The signature:** the doorway opens with the scroll over one and a half screens. The picture settles while the title and sentence fade. It follows the scroll with a 60ms glide and eases at both ends, so wheel notches never snap it forward. This uses `position: sticky` and never takes over the scroll. In-page links scroll smoothly.
 - **Entrances:** parts of a section rise 24px and fade in, staggered by 70ms. Only what starts below the fold is held back, and only once the script runs, so nothing depends on it.
 - **The frame:** the covers count up from the first essay to the newest, only while the frame is on screen.
 - **Feedback:** every control responds to hover, press and focus.
