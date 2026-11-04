@@ -5,9 +5,9 @@ categories:
 - Cognitive Science
 date: 2026-07-04 12:00:00 +0530
 description: When you try to pull a moment back from the past, what exactly arrives in your mind? Is it a picture? A sound?
-image: /_assets/images/cover_06.png
-image_width: 1024
-image_height: 1536
+image: /_assets/images/cover-06.png
+image_width: 1200
+image_height: 1200
 layout: post
 title: The Invisible Architecture of Memory
 ---

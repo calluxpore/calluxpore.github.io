@@ -9,8 +9,8 @@ categories:
 date: 2026-07-31 10:00:00 +0530
 description: Pressing play on a story through a pair of headphones seems simple enough.
 image: /_assets/images/cover-09.png
-image_width: 1024
-image_height: 1536
+image_width: 1200
+image_height: 1200
 layout: post
 title: Harry Potter and the Echoes of Hogwarts
 ---

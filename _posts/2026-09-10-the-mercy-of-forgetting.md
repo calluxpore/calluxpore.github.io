@@ -6,9 +6,9 @@ categories:
 date: '2026-09-10'
 description: My father's elder brother stopped speaking to a cousin over a piece of
   land in 1979.
-image: /_assets/images/cover-016.png
-image_height: 1264
-image_width: 848
+image: /_assets/images/cover-16.png
+image_height: 1200
+image_width: 1200
 layout: post
 title: The Mercy of Forgetting
 ---

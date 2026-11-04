@@ -5,9 +5,9 @@ categories:
 date: '2026-10-02'
 description: When I was a boy, the first monsoon rains always brought the ants. They
   never arrived all at once.
-image: /_assets/images/cover-019.jpg
-image_height: 1263
-image_width: 848
+image: /_assets/images/cover-19.png
+image_height: 1200
+image_width: 1200
 layout: post
 title: The Invasion
 ---

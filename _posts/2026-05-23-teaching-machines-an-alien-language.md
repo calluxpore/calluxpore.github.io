@@ -5,9 +5,9 @@ categories:
 - Experimental Linguistics
 date: 2026-05-23 10:00:00 +0530
 description: Three years ago, I became obsessed with the language from Arrival. Not the spoken one, though that fascinated me too. The whale-like groans. The clicks.
-image: /_assets/images/cover_03.png
-image_width: 682
-image_height: 1024
+image: /_assets/images/cover-03.png
+image_width: 1200
+image_height: 1200
 layout: post
 title: Teaching Machines an Alien Language
 ---

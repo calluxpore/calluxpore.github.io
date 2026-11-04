@@ -6,9 +6,9 @@ categories:
 date: '2026-10-21'
 description: 'I have a confession that is a little embarrassing. Whenever I see an
   animal I have never seen before, a small voice in my head asks: is this an alien?'
-image: /_assets/images/cover-022.jpg
-image_height: 1264
-image_width: 848
+image: /_assets/images/cover-22.png
+image_height: 1200
+image_width: 1200
 layout: post
 title: The Capybara Hypothesis
 ---

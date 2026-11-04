@@ -5,9 +5,9 @@ categories:
 date: '2026-10-15'
 description: A few months ago, I wrote about a strange unease. I had been feeding
   fragments of my childhood rooms into generative models, and the models kept filling…
-image: /_assets/images/cover-020.jpg
-image_height: 1264
-image_width: 848
+image: /_assets/images/cover-20.png
+image_height: 1200
+image_width: 1200
 layout: post
 title: Inception by Default
 ---

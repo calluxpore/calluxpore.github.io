@@ -6,9 +6,9 @@ categories:
 date: '2026-09-22'
 description: In my grandparents' ancestral house, the threshold dividing the inner
   courtyard from the front veranda was carved from a single, massive beam of teak.
-image: /_assets/images/cover-017.png
-image_height: 1264
-image_width: 848
+image: /_assets/images/cover-17.png
+image_height: 1200
+image_width: 1200
 layout: post
 title: The Patina Problem - Why Synthetic Worlds Cannot Age
 ---

@@ -5,9 +5,9 @@ categories:
 - AI Economics
 date: 2026-05-23 11:00:00 +0530
 description: In early 2025, I was sitting inside the ACE Lab at OCAD University speaking with Dr.Alexis Morris. The room had that familiar research lab atmosphere.
-image: /_assets/images/cover_04.png
-image_width: 682
-image_height: 1024
+image: /_assets/images/cover-04.png
+image_width: 1200
+image_height: 1200
 layout: post
 title: When AI Stops Needing Us
 ---

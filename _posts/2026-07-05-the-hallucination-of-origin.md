@@ -7,9 +7,9 @@ categories:
 date: '2026-07-05'
 description: Have you ever experienced a vivid sense of déjà vu, or remembered a childhood event so clearly you could practically taste the birthday cake, only to…
 layout: post
-image: /_assets/images/cover_07.png
-image_width: 1024
-image_height: 1536
+image: /_assets/images/cover-07.png
+image_width: 1200
+image_height: 1200
 title: The Hallucination of Origin
 ---
 

@@ -5,9 +5,9 @@ categories:
 - Artificial Intelligence
 date: '2026-08-04'
 description: When I was a young boy, visiting my father’s elder brother in another city was a rare delight.
-image: /_assets/images/cover-013.png
-image_width: 1024
-image_height: 1536
+image: /_assets/images/cover-13.png
+image_width: 1200
+image_height: 1200
 layout: post
 title: The Memory of Fear
 ---

@@ -6,9 +6,9 @@ categories:
 - Ethics
 date: 2026-08-01 02:00:00 +0530
 description: I was recently testing a highly publicized audio model, one marketed for its emotional nuance and its ability to simulate hesitations, laughter, and feeling.
-image: /_assets/images/cover-012.png
-image_width: 1024
-image_height: 1536
+image: /_assets/images/cover-12.png
+image_width: 1200
+image_height: 1200
 layout: post
 title: Latent Grief
 ---

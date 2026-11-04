@@ -8,9 +8,9 @@ date: '2026-10-17'
 description: The bat came in through the window one summer evening at my grandparents'
   house, in that blue half hour after the lights go on and before anyone thinks to
   close the shutters.
-image: /_assets/images/cover-021.jpg
-image_height: 1600
-image_width: 1016
+image: /_assets/images/cover-21.png
+image_height: 1200
+image_width: 1200
 layout: post
 title: What Is It Like to Be a Bat?
 ---

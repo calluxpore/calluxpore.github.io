@@ -406,7 +406,7 @@ time, .time-display { font-variant-numeric: tabular-nums; }
 .creds { list-style: none; padding: 0; margin: 40px 0 32px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 .creds b { display: block; }
 .creds span { color: var(--muted); font-size: var(--step-small); }
-.cover-frame { grid-column: 9 / 13; position: relative; aspect-ratio: 2 / 3; background: #000; overflow: hidden; border-radius: var(--radius); }
+.cover-frame { grid-column: 9 / 13; position: relative; aspect-ratio: 1; background: #000; overflow: hidden; border-radius: var(--radius); }
 .cover-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.6s; }
 .cover-frame img.on { opacity: 1; }
 
@@ -492,7 +492,7 @@ pre code { padding: 0; background: none; color: var(--ink); font-size: inherit; 
 .related-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 .related-card { display: block; text-decoration: none; transition: transform 0.25s var(--ease-out); }
 .related-card:hover { transform: translateY(-4px); }
-.related-card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; background: #000; margin-bottom: 14px; border-radius: var(--radius); }
+.related-card img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #000; margin-bottom: 14px; border-radius: var(--radius); }
 .related-card-title { display: block; font-size: var(--step-lead); font-weight: 600; line-height: 1.2; margin-bottom: 4px; }
 .related-card-meta { display: block; color: var(--field-muted); }
 

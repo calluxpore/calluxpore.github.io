@@ -6,9 +6,9 @@ categories:
 date: '2026-09-23'
 description: When I was a boy playing cricket in dusty afternoon streets, the bat
   was always a fraction too heavy for me.
-image: /_assets/images/cover-018.png
-image_height: 715
-image_width: 480
+image: /_assets/images/cover-18.png
+image_height: 1200
+image_width: 1200
 layout: post
 title: The Weight of Everything Around Us
 ---
